@@ -34,6 +34,11 @@ public class Networking: NSObject {
     public func GET<DOWN: Decodable>(from urlRequest: URLRequest) async throws -> DOWN {
         try await self.download(urlRequest: urlRequest)
     }
+    
+    /// Issues a GET request, writing the output to a file.
+    public func GET(from urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
+        try await self.load(urlRequest: urlRequest, to: destinationURL)
+    }
 
     /// Issues a HEAD request, returning a set of headers.
     public func HEAD(at urlRequest: URLRequest) async throws -> HTTP.Headers {
@@ -98,6 +103,11 @@ internal extension Networking {
         let (data, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
         return try self.handleIncoming(data: data, response: response)
     }
+
+    func load(urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
+        let (url, response) = try await self.urlSession.download(for: urlRequest, delegate: nil)
+        return try self.handleFile(source: url, destination: destinationURL, response: response)
+    }
 }
 
 private extension Networking {
@@ -146,5 +156,17 @@ private extension Networking {
         guard status.responseType == .Success else { throw Error.unsuccessful(status) }
         let headers = httpResponse.allHeaderFields as? [String: String] ?? [:]
         return (status, headers)
+    }
+    
+    func handleFile(source: URL, destination: URL, response: URLResponse) throws -> HTTP.Headers {
+        
+        guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
+        let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
+        guard status.responseType == .Success else { throw Error.unsuccessful(status) }
+
+        try? FileManager.default.removeItem(at: destination) // might fail, if not existing, we don't care
+        try FileManager.default.moveItem(at: source, to: destination)
+        let headers = httpResponse.allHeaderFields as? [String: String] ?? [:]
+        return headers
     }
 }

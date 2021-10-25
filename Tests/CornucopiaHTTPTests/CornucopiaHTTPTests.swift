@@ -42,4 +42,13 @@ final class CornucopiaHTTPTests: XCTestCase {
         let id = subjects.randomElement()!.id!
         try await HTTP.DELETE(via: "\(serverPrefix)/subjects/\(id)")
     }
+    
+    func testGETtoURL() async throws {
+        
+        let url = URL(string: "https://www.google.de/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png")!
+        let destination = URL(fileURLWithPath: "/tmp/\(UUID()).png")
+        let headers = try await HTTP.GET(via: URLRequest(url: url), to: destination)
+        print("file downloaded to \(destination), received headers: \(headers)")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
+    }
 }
