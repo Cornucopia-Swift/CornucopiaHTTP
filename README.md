@@ -13,7 +13,7 @@ It's an SPM-compatible package.
 
 ## Usage
 
-TBD
+TBD. For now, please take a look at the tests.
 
 ## Contribution
 
