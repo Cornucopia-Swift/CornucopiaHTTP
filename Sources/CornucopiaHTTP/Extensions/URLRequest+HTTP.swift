@@ -11,7 +11,7 @@ extension URLRequest {
     public func DELETE() async throws -> HTTP.Status {
         try await Networking().self.trigger(urlRequest: self, method: .DELETE)
     }
-    
+
     /// Issues a HTTP GET request, returning a `Decodable` resource.
     public func GET<DOWN: Decodable>() async throws -> DOWN {
         try await Networking().self.download(urlRequest: self)

@@ -57,6 +57,7 @@ extension HTTP {
     /// Well-known HTTP mime types
     public enum MimeType: String {
         case applicationJSON = "application/json"
+        case applicationOctetStream = "application/octet-stream"
         case imageJPEG = "image/jpeg"
         case imageHEIC = "image/heic"
         case textPlain = "text/plain"

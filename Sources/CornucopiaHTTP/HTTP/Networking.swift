@@ -129,13 +129,14 @@ private extension Networking {
     }
     
     func handleIncoming<T: Decodable>(data: Data, response: URLResponse) throws -> T {
-        
+
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
         let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
         guard status.responseType == .Success else { throw Error.unsuccessful(status) }
+
         let mimeType = HTTP.MimeType(rawValue: response.mimeType ?? "unknown/unknown") ?? .unknown
-        
         switch mimeType {
+            // This is the usual case. We try to decode into the requested type and return the resulting entity hierarchy.
             case .applicationJSON:
                 do {
                     let entity = try JSONDecoder().decode(T.self, from: data)
@@ -143,7 +144,12 @@ private extension Networking {
                 } catch {
                     throw Error.decodingError(error)
                 }
-                
+
+            // If we receive an octet stream and the requested type is a `Data`, we just pass it through.
+            // (Although `Data` is indeed a valid `Decodable`, it is illegal as top-level JSON object.)
+            case .applicationOctetStream where T.self == Data.self || T.self == Optional<Data>.self:
+                return data as! T
+
             default:
                 throw Error.unexpectedMimeType(response.mimeType ?? "unknown/unknown")
         }
