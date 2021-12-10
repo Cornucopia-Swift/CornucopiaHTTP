@@ -52,6 +52,7 @@ extension HTTP {
         case contentLength = "Content-Length"
         case contentType = "Content-Type"
         case range = "Range"
+        case userAgent = "User-Agent"
     }
 
     /// Well-known HTTP mime types

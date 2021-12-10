@@ -3,6 +3,8 @@
 //
 import Foundation
 
+#if !canImport(CornucopiaCore) // the very same is already defined there
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -16,3 +18,4 @@ extension URLRequest: ExpressibleByStringInterpolation {
         self = URLRequest(url: url!)
     }
 }
+#endif
