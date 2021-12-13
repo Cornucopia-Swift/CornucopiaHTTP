@@ -19,7 +19,8 @@ let package = Package(
             targets: ["CornucopiaHTTP"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/tsolomko/SWCompression", from: "4.6.0")
+        .package(url: "https://github.com/Cornucopia-Swift/CornucopiaCore", branch: "master"),
+        .package(url: "https://github.com/tsolomko/SWCompression", from: "4.6.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -27,6 +28,7 @@ let package = Package(
         .target(
             name: "CornucopiaHTTP",
             dependencies: [
+                "CornucopiaCore",
                 "SWCompression",
             ]
         ),
