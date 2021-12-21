@@ -18,7 +18,7 @@ public enum HTTP {
     }
     
     /// Issues a HTTP GET request, writing the result to the (file url) `destinationURL`.
-    public static func GET(via urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
+    public static func GET(from urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
         try await Networking().self.load(urlRequest: urlRequest, to: destinationURL)
     }
 
