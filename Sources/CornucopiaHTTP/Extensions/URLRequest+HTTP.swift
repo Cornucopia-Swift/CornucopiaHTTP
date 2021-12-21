@@ -17,6 +17,12 @@ extension URLRequest {
         try await Networking().self.download(urlRequest: self)
     }
     
+    /// Issues a HTTP GET request, saving returned data to a file.
+    @discardableResult
+    public func GET(to destinationURL: URL) async throws -> HTTP.Headers {
+        try await Networking().self.load(urlRequest: self, to: destinationURL)
+    }
+    
     /// Issues a HTTP HEAD request, returning a set of headers.
     public func HEAD() async throws -> HTTP.Headers {
         try await Networking().self.headers(urlRequest: self)
