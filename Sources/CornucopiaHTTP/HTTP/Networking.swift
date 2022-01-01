@@ -65,6 +65,8 @@ public class Networking: NSObject {
 internal extension Networking {
 
     func download<T: Decodable>(urlRequest: URLRequest) async throws -> T {
+        
+        if let mock = Self.mock(for: urlRequest) { return try self.handleIncoming(data: mock.data, response: mock.response) }
 
         let (data, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
         return try self.handleIncoming(data: data, response: response)
