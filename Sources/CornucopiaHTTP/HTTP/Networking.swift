@@ -9,6 +9,9 @@ public class Networking: NSObject {
     /// To opt-out of compressing
     public static var enableCompressedUploads: Bool = true
 
+    /// To use a custom URLSession
+    public static var customURLSession: URLSession?
+
     /// What can go wrong?
     public enum Error: Swift.Error {
 
@@ -18,10 +21,10 @@ public class Networking: NSObject {
         case decodingError(Swift.Error)
     }
 
-    public private(set) var urlSession: URLSession
+    public var urlSession: URLSession
 
     public override init() {
-        self.urlSession = URLSession.shared
+        self.urlSession = Self.customURLSession ?? URLSession.shared
     }
 
     /// Issues a DELETE request for the identified resource.
