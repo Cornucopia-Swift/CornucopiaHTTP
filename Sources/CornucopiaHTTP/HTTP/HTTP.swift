@@ -32,6 +32,11 @@ public enum HTTP {
         try await Networking().self.updownload(item: item, urlRequest: urlRequest, method: .PATCH)
     }
 
+    /// Issues a HTTP PATCH request with an `Encodable` resource and returns a `Decodable` resource of (possibly) another type.
+    public static func PATCH<UP: Encodable, DOWN: Decodable>(item: UP, to urlRequest: URLRequest) async throws -> DOWN {
+        try await Networking().self.updownload(item: item, urlRequest: urlRequest, method: .PATCH)
+    }
+
     /// Issues a HTTP POST request with an `Codable` resource and returns the created resource (of the same type).
     public static func POST<UPDOWN: Codable>(item: UPDOWN, to urlRequest: URLRequest) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: urlRequest)

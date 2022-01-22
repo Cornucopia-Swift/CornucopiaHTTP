@@ -33,6 +33,11 @@ extension URLRequest {
         try await Networking().self.updownload(item: item, urlRequest: self, method: .PATCH)
     }
     
+    /// Issues a HTTP PATCH request with an `Encodable` resource and returns a `Decodable` resource of (possibly) another type.
+    public func PATCH<UP: Encodable, DOWN: Decodable>(item: UP) async throws -> DOWN {
+        try await Networking().self.updownload(item: item, urlRequest: self, method: .PATCH)
+    }
+
     /// Issues a HTTP POST request with an `Codable` resource and returns the created resource (of the same type).
     public func POST<UPDOWN: Codable>(item: UPDOWN) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: self)
