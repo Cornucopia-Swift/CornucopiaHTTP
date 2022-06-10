@@ -18,5 +18,4 @@ xcuserdata
 xcshareddata
 DerivedData
 # SPM
-Package.resolved
 .swiftpm
