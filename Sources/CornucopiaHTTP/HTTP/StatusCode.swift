@@ -3,7 +3,8 @@
 //
 extension HTTP {
 
-    public enum Status: Int, Error {
+    /// The classical list of HTTP status codes, see [RFC7231](https://datatracker.ietf.org/doc/html/rfc7231)
+    @frozen public enum Status: Int, Swift.Error {
 
         // -0xx Internal
         case MalformedUrl = -1
@@ -87,7 +88,7 @@ extension HTTP {
         case Unknown = 999
 
         // Grouping
-        public enum ResponseType {
+        @frozen public enum ResponseType {
             case Internal
             case Informational
             case Success

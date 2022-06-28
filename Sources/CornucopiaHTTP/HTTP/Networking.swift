@@ -1,6 +1,7 @@
 //
 //  Cornucopia – (C) Dr. Lauer Information Technology
 //
+import CornucopiaCore
 import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -16,12 +17,13 @@ public class Networking: NSObject {
     public static var customURLSession: URLSession?
 
     /// What can go wrong?
-    public enum Error: Swift.Error {
+    @frozen public enum Error: Swift.Error {
 
         case unexpectedResponse(String)
         case unexpectedMimeType(String)
         case unsuccessful(HTTP.Status)
         case decodingError(Swift.Error)
+        case unsuccessfulWithDetails(HTTP.Status, details: [String: AnyDecodable])
     }
 
     public var urlSession: URLSession

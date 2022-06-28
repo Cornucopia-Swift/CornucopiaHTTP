@@ -9,7 +9,7 @@ extension HTTP {
     public typealias StatusAndHeaders = (status: Status, headers: Headers)
 
     /// Well-known HTTP methods
-    public enum Method: String {
+    @frozen public enum Method: String {
         case CONNECT
         case DELETE
         case GET
@@ -21,7 +21,7 @@ extension HTTP {
         case TRACE
 
         /// HTTP Methods used with the WebDAV protocol
-        public enum WebDAV: String {
+        @frozen public enum WebDAV: String {
             case COPY
             case LOCK
             case MKCOL
@@ -31,7 +31,7 @@ extension HTTP {
         }
 
         /// HTTP Methods used with the RTS protocol
-        public enum RTSP: String {
+        @frozen public enum RTSP: String {
             case ANNOUNCE
             case DESCRIBE
             case GET_PARAMETER
@@ -46,7 +46,7 @@ extension HTTP {
     }
 
     /// Well-known HTTP header fields
-    public enum HeaderField: String {
+    @frozen public enum HeaderField: String {
         case authorization = "Authorization"
         case contentEncoding = "Content-Encoding"
         case contentLength = "Content-Length"
@@ -56,7 +56,7 @@ extension HTTP {
     }
 
     /// Well-known HTTP mime types
-    public enum MimeType: String {
+    @frozen public enum MimeType: String {
         case applicationJSON = "application/json"
         case applicationOctetStream = "application/octet-stream"
         case imageJPEG = "image/jpeg"
@@ -66,7 +66,7 @@ extension HTTP {
     }
     
     /// Well-known HTTP content encoding types
-    public enum ContentEncoding: String {
+    @frozen public enum ContentEncoding: String {
         case gzip = "gzip"
         case deflate = "deflate"
         case brotli = "br"

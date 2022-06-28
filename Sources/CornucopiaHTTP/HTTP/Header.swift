@@ -9,7 +9,7 @@ import FoundationNetworking
 
 extension HTTP {
     
-    public enum Header {
+    @frozen public enum Header {
         
         case authorization(token: Cornucopia.Core.JWT.Token<Cornucopia.Core.JWT.Payload>)
         case contentEncoding(ContentEncoding)

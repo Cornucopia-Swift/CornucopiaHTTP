@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "AnyCodable",
+        "repositoryURL": "https://github.com/zmian/AnyCodable",
+        "state": {
+          "branch": "master",
+          "revision": "ca1a7d64fd7584fb0e3d4de521c76e2969b8ded6",
+          "version": null
+        }
+      },
+      {
         "package": "BitByteData",
         "repositoryURL": "https://github.com/tsolomko/BitByteData",
         "state": {
@@ -15,7 +24,7 @@
         "repositoryURL": "https://github.com/Cornucopia-Swift/CornucopiaCore",
         "state": {
           "branch": "master",
-          "revision": "8b2973d89a72df9abcfbe7ac975c877a55821ddc",
+          "revision": "28d7f958e3a70a02e6233584cbe54fe731309849",
           "version": null
         }
       },

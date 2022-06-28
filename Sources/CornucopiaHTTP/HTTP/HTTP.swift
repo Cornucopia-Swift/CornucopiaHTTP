@@ -7,7 +7,7 @@ import FoundationNetworking
 #endif
 
 /// HTTP Convenience wrappers.
-public enum HTTP {
+@frozen public enum HTTP {
 
     /// Issues a HTTP DELETE request for the identified resource.
     @discardableResult
