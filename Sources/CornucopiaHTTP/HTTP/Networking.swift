@@ -142,14 +142,21 @@ private extension Networking {
 
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
         let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
-        guard status.responseType == .Success else { throw Error.unsuccessful(status) }
-
         let mimeType = HTTP.MimeType(rawValue: response.mimeType ?? "unknown/unknown") ?? .unknown
+        guard status.responseType == .Success else {
+            // We have an error, check whether it contains details or not.
+            guard mimeType == .applicationJSON else {
+                // No details or an unknown mime type.
+                throw Error.unsuccessful(status)
+            }
+            guard let details = try? Cornucopia.Core.JSONDecoder().decode([String: AnyDecodable].self, from: data) else { throw Error.unsuccessful(status) }
+            throw Error.unsuccessfulWithDetails(status, details: details)
+        }
         switch mimeType {
             // This is the usual case. We try to decode into the requested type and return the resulting entity hierarchy.
             case .applicationJSON:
                 do {
-                    let entity = try JSONDecoder().decode(T.self, from: data)
+                    let entity = try Cornucopia.Core.JSONDecoder().decode(T.self, from: data)
                     return entity
                 } catch {
                     throw Error.decodingError(error)
