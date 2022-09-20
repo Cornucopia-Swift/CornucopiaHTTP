@@ -15,22 +15,30 @@ extension HTTP {
         case contentEncoding(ContentEncoding)
         case contentLength(Int)
         case contentType(MimeType)
-        case range(closed: ClosedRange<Int>)
-        case range(partialFrom: PartialRangeFrom<Int>)
-        case range(partialThrough: PartialRangeThrough<Int>)
+        case rangeClosed(ClosedRange<Int>)
+        case rangePartialFrom(PartialRangeFrom<Int>)
+        case rangePartialThrough(PartialRangeThrough<Int>)
         case userAgent(String)
 
-        public func apply(to urlRequest: inout URLRequest) {
-            
+        public var field: String {
             switch self {
-
-                case .userAgent(let value):
-                    urlRequest.setValue(value, forHTTPHeaderField: HeaderField.userAgent.rawValue)
-
-                default:
-                    fatalError("not yet implemented")
-                }
+                case .authorization(_): return HeaderField.authorization.rawValue
+                case .contentEncoding(_): return HeaderField.contentEncoding.rawValue
+                case .contentLength(_): return HeaderField.contentLength.rawValue
+                case .contentType(_): return HeaderField.contentType.rawValue
+                case .rangeClosed(_), .rangePartialFrom(_), .rangePartialThrough(_): return HeaderField.range.rawValue
+                case .userAgent(_): return HeaderField.userAgent.rawValue
+            }
         }
+
+        public var value: String {
+            switch self {
+                case .userAgent(let value): return value
+                default: fatalError("not yet implemented")
+            }
+        }
+
+        public func apply(to urlRequest: inout URLRequest) { urlRequest.setValue(self.value, forHTTPHeaderField: self.field) }
     }
 }
 
