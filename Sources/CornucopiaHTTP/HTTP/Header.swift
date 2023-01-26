@@ -10,7 +10,8 @@ import FoundationNetworking
 extension HTTP {
     
     @frozen public enum Header {
-        
+
+        case acceptLanguage(String)
         case authorization(token: Cornucopia.Core.JWT.Token<Cornucopia.Core.JWT.Payload>)
         case contentEncoding(ContentEncoding)
         case contentLength(Int)
@@ -22,6 +23,7 @@ extension HTTP {
 
         public var field: String {
             switch self {
+                case .acceptLanguage(_): return HeaderField.acceptLanguage.rawValue
                 case .authorization(_): return HeaderField.authorization.rawValue
                 case .contentEncoding(_): return HeaderField.contentEncoding.rawValue
                 case .contentLength(_): return HeaderField.contentLength.rawValue
