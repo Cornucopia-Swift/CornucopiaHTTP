@@ -9,12 +9,15 @@ import FoundationNetworking
 import SWCompression
 
 public class Networking: NSObject {
-    
+
     /// To opt-out of compressing
     public static var enableCompressedUploads: Bool = true
 
     /// To use a custom URLSession
     public static var customURLSession: URLSession?
+
+    /// A configurable busy provider
+    public static var busynessObserver: (any Cornucopia.Core.BusynessObserver)? = nil
 
     /// What can go wrong?
     @frozen public enum Error: Swift.Error {
@@ -26,7 +29,7 @@ public class Networking: NSObject {
         case unsuccessfulWithDetails(HTTP.Status, details: [String: AnyDecodable])
     }
 
-    public var urlSession: URLSession
+    public let urlSession: URLSession
 
     public override init() {
         self.urlSession = Self.customURLSession ?? URLSession.shared
@@ -75,8 +78,9 @@ internal extension Networking {
     func download<T: Decodable>(urlRequest: URLRequest) async throws -> T {
         
         if let mock = Self.mock(for: urlRequest) { return try self.handleIncoming(data: mock.data, response: mock.response) }
-
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         let (data, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() }
         return try self.handleIncoming(data: data, response: response)
     }
     
@@ -84,7 +88,9 @@ internal extension Networking {
         
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() }
         return try self.handleResponse(response).status
     }
 
@@ -92,7 +98,9 @@ internal extension Networking {
         
         var urlRequest = urlRequest
         urlRequest.httpMethod = HTTP.Method.HEAD.rawValue
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() }
         return try self.handleResponse(response).headers
     }
 
@@ -101,7 +109,9 @@ internal extension Networking {
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
         let uploadData = try self.prepareUpload(item: item, in: &urlRequest)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         let (_, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() }
         return try self.handleResponse(response).status
     }
 
@@ -110,12 +120,16 @@ internal extension Networking {
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
         let uploadData = try self.prepareUpload(item: item, in: &urlRequest)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         let (data, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() }
         return try self.handleIncoming(data: data, response: response)
     }
 
     func load(urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         let (url, response) = try await self.urlSession.download(for: urlRequest, delegate: nil)
+        if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() }
         return try self.handleFile(source: url, destination: destinationURL, response: response)
     }
 }

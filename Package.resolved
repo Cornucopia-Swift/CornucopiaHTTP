@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "AnyCodable",
-        "repositoryURL": "https://github.com/zmian/AnyCodable",
+        "repositoryURL": "https://github.com/mickeyl/AnyCodable",
         "state": {
-          "branch": "master",
-          "revision": "ca1a7d64fd7584fb0e3d4de521c76e2969b8ded6",
-          "version": null
+          "branch": null,
+          "revision": "bcbafbc461058bda170ca59013ba599b5613e72a",
+          "version": "0.6.6"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/tsolomko/BitByteData",
         "state": {
           "branch": null,
-          "revision": "c119e12decae8f56066df3345a4ac1a05b2f06d5",
-          "version": "2.0.1"
+          "revision": "b4b41619522aacd7aae7b02fa8360833e796a03d",
+          "version": "2.0.2"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/Cornucopia-Swift/CornucopiaCore",
         "state": {
           "branch": "master",
-          "revision": "28d7f958e3a70a02e6233584cbe54fe731309849",
+          "revision": "fbacd452e47d7a3c149583ebdac6368a38bd52da",
           "version": null
         }
       },
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/tsolomko/SWCompression",
         "state": {
           "branch": null,
-          "revision": "0714d4421e1fa1e02af51cd8e615417a95f0d230",
-          "version": "4.8.1"
+          "revision": "cd39ca0a3b269173bab06f68b182b72fa690765c",
+          "version": "4.8.5"
         }
       },
       {
