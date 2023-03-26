@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "FoundationBandAid",
+        "repositoryURL": "https://github.com/mickeyl/FoundationBandAid",
+        "state": {
+          "branch": "master",
+          "revision": "6c617364582c50b944a8ba2b51ece4681ae724ce",
+          "version": null
+        }
+      },
+      {
         "package": "SWCompression",
         "repositoryURL": "https://github.com/tsolomko/SWCompression",
         "state": {

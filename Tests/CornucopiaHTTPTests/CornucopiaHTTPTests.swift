@@ -1,7 +1,11 @@
 import XCTest
+import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 @testable import CornucopiaHTTP
 
-let serverPrefix = "http://localhost.proxyman.io:3000"
+let serverPrefix = "http://localhost:3000"
 
 struct Subject: Codable {
     let id: Int?

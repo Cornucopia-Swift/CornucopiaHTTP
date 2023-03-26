@@ -9,7 +9,7 @@ the nitty details of asynchronous HTTP networking behind a friendly syntax.
 
 ## Platforms
 
-Everything Apple. The Linux-support is waiting for https://github.com/apple/swift-corelibs-foundation/issues/3205 to be fixed.
+Everything where Swift runs.
 
 ## Integration
 
@@ -18,6 +18,10 @@ It's an SPM-compatible package.
 ## Usage
 
 TBD. For now, please take a look at the tests.
+
+## Tests
+
+To run the end-to-end-tests, issue `json-server json-server/db.json` first.
 
 ## Contribution
 

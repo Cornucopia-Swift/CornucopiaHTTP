@@ -1,8 +1,8 @@
 {
   "subjects": [
     {
-      "id": 1,
-      "name": "name has changed"
+      "name": "name has changed",
+      "id": 1
     },
     {
       "id": 2,
@@ -22,15 +22,15 @@
     },
     {
       "name": "Hans Wurst",
-      "id": 8
-    },
-    {
-      "name": "Hans Wurst",
       "id": 9
     },
     {
       "name": "Hans Wurst",
       "id": 10
+    },
+    {
+      "name": "Hans Wurst",
+      "id": 11
     }
   ]
 }
