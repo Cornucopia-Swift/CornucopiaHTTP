@@ -11,6 +11,7 @@ AntiCrack-InfoScanner-Result.h
 ._*
 .smbdelete*
 .idea
+.vscode
 /.build
 /Packages
 project.xcworkspace
