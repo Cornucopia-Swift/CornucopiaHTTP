@@ -183,6 +183,9 @@ private extension Networking {
             // (Although `Data` is indeed a valid `Decodable`, it is illegal as top-level JSON object.)
             case .applicationOctetStream where T.self == Data.self || T.self == Optional<Data>.self:
                 return data as! T
+            // Some servers return `application/x-dosexec` for `.bin` files, which we want as binary.
+            case .applicationXDosexec where T.self == Data.self || T.self == Optional<Data>.self:
+                return data as! T
 
             default:
                 throw Error.unexpectedMimeType(response.mimeType ?? "unknown/unknown")
