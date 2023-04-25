@@ -60,6 +60,7 @@ extension HTTP {
     @frozen public enum MimeType: String {
         case applicationJSON = "application/json"
         case applicationOctetStream = "application/octet-stream"
+        case applicationXDosexec = "application/x-dosexec"
         case imageJPEG = "image/jpeg"
         case imageHEIC = "image/heic"
         case textPlain = "text/plain"
