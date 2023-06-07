@@ -57,6 +57,12 @@ extension URLRequest {
         try await Networking().self.upload(item: item, urlRequest: self)
     }
     
+    /// Issues a HTTP POST request with a binary resource and returns the status code – ignoring any further content received from the server.
+    @discardableResult
+    public func POST(data: Data) async throws -> HTTP.Status {
+        try await Networking().self.binaryUpload(data: data, urlRequest: self)
+    }
+
     /// Issues a HTTP PUT request with an `Codable` resource and returns the created resource (of the same type).
     public func PUT<UPDOWN: Codable>(item: UPDOWN) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: self, method: .PUT)
