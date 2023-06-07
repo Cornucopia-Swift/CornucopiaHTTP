@@ -55,4 +55,11 @@ final class CornucopiaHTTPTests: XCTestCase {
         print("file downloaded to \(destination), received headers: \(headers)")
         XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
     }
+
+    func testBinaryPOST() async throws {
+        let binary: [UInt8] = [0, 1, 2, 3, 4, 5]
+        let data = Data(binary)
+        let url = URL(string: "http://www.foo.bar.baz/testing")!
+        try await HTTP.POST(data: data, via: URLRequest(url: url))
+    }
 }

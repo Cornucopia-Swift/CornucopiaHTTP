@@ -56,7 +56,12 @@ import FoundationNetworking
         try await Networking().self.upload(item: item, urlRequest: urlRequest)
     }
 
-    /// Issues a HTTP PUT request with an `Codable` resource and returns the created resource (of the same type).
+    /// Issues a HTTP POST request with a binary resource and returns the status code ­– ignoring any further content received from the server.
+    public static func POST(data: Data, via urlRequest: URLRequest) async throws -> HTTP.Status {
+        try await Networking().self.binaryUpload(data: data, urlRequest: urlRequest)
+    }
+
+    /// Issues a HTTP PUT request with a `Codable` resource and returns the created resource (of the same type).
     public static func PUT<UPDOWN: Codable>(item: UPDOWN, to urlRequest: URLRequest) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: urlRequest, method: .PUT)
     }

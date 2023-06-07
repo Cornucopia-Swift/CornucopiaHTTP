@@ -74,6 +74,12 @@ public class Networking: NSObject {
     public func POST<UP: Codable>(item: UP, via urlRequest: URLRequest) async throws -> HTTP.Status {
         try await self.upload(item: item, urlRequest: urlRequest)
     }
+
+    /// Issues a POST request with a binary resource and returns the status code, ignoring any further content received from the server.
+    @discardableResult
+    public func POST(data: Data, via urlRequest: URLRequest) async throws -> HTTP.Status {
+        try await self.binaryUpload(data: data, urlRequest: urlRequest)
+    }
 }
 
 internal extension Networking {
@@ -117,6 +123,18 @@ internal extension Networking {
         let (_, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
         return try self.handleResponse(response).status
     }
+
+    func binaryUpload(data: Data, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> HTTP.Status {
+
+        var urlRequest = urlRequest
+        urlRequest.setValue(HTTP.MimeType.applicationOctetStream.rawValue, forHTTPHeaderField: HTTP.HeaderField.contentType.rawValue)
+        urlRequest.httpMethod = method.rawValue
+        if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
+        defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
+        let (_, response) = try await self.urlSession.upload(for: urlRequest, from: data, delegate: nil)
+        return try self.handleResponse(response).status
+    }
+
 
     func updownload<UP: Encodable, DOWN: Decodable>(item: UP, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> DOWN {
 
