@@ -13,6 +13,7 @@ extension HTTP {
 
         case acceptLanguage(String)
         case authorization(token: Cornucopia.Core.JWT.Token<Cornucopia.Core.JWT.Payload>)
+        case contentDisposition([String])
         case contentEncoding(ContentEncoding)
         case contentLength(Int)
         case contentType(MimeType)
@@ -25,6 +26,7 @@ extension HTTP {
             switch self {
                 case .acceptLanguage(_): return HeaderField.acceptLanguage.rawValue
                 case .authorization(_): return HeaderField.authorization.rawValue
+                case .contentDisposition(_): return HeaderField.contentDisposition.rawValue
                 case .contentEncoding(_): return HeaderField.contentEncoding.rawValue
                 case .contentLength(_): return HeaderField.contentLength.rawValue
                 case .contentType(_): return HeaderField.contentType.rawValue

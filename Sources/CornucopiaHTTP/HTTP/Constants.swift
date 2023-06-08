@@ -49,6 +49,7 @@ extension HTTP {
     @frozen public enum HeaderField: String {
         case acceptLanguage = "Accept-Language"
         case authorization = "Authorization"
+        case contentDisposition = "Content-Disposition"
         case contentEncoding = "Content-Encoding"
         case contentLength = "Content-Length"
         case contentType = "Content-Type"
