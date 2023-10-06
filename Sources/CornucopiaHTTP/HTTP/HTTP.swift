@@ -25,6 +25,11 @@ import FoundationNetworking
         try await Networking().self.load(urlRequest: urlRequest, to: destinationURL)
     }
 
+    /// Issues a HTTP GET request, writing the result to the (file url) `destinationURL`.
+    public static func GET(from urlRequest: URLRequest, to destinationURL: URL, observeProgress: Networking.ProgressObserver) async throws -> HTTP.Headers {
+        try await Networking().self.load(urlRequest: urlRequest, to: destinationURL)
+    }
+
     /// Issues a HTTP HEAD request, returning a set of headers.
     public static func HEAD(at urlRequest: URLRequest) async throws -> HTTP.Headers {
         try await Networking().self.headers(urlRequest: urlRequest)

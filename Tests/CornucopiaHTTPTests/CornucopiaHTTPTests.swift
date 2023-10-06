@@ -56,6 +56,16 @@ final class CornucopiaHTTPTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
     }
 
+    func testGETtoURLwithProgress() async throws {
+        let url = URL(string: "http://speedtest.ftp.otenet.gr/files/test10Mb.db")!
+        let destination = URL(fileURLWithPath: "/tmp/\(UUID()).test10Mb.db")
+        let headers = try await Networking().self.load(urlRequest: URLRequest(url: url), to: destination) { progress in
+            print("file download progress: \(progress.fractionCompleted)")
+        }
+        print("file downloaded to \(destination), received headers: \(headers)")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
+    }
+
     func testBinaryPOST() async throws {
         let binary: [UInt8] = [0, 1, 2, 3, 4, 5]
         let data = Data(binary)

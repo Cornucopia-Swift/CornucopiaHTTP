@@ -32,6 +32,10 @@ public class Networking: NSObject {
         case unsuccessfulWithDetails(HTTP.Status, details: [String: AnyDecodable])
     }
 
+    /// To observe progress
+    public typealias ProgressObserver = (Progress) -> ()
+
+    /// The current `URLsession`
     public let urlSession: URLSession
 
     public override init() {
@@ -52,6 +56,11 @@ public class Networking: NSObject {
     /// Issues a GET request, writing the output to a file.
     public func GET(from urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
         try await self.load(urlRequest: urlRequest, to: destinationURL)
+    }
+
+    /// Issues a GET request, writing the output to a file, observing download progress.
+    public func GET(from urlRequest: URLRequest, to destinationURL: URL, progressObserver: @escaping(Networking.ProgressObserver)) async throws -> HTTP.Headers {
+        try await self.load(urlRequest: urlRequest, to: destinationURL, progressObserver: progressObserver)
     }
 
     /// Issues a HEAD request, returning a set of headers.
@@ -135,7 +144,6 @@ internal extension Networking {
         return try self.handleResponse(response).status
     }
 
-
     func updownload<UP: Encodable, DOWN: Decodable>(item: UP, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> DOWN {
 
         var urlRequest = urlRequest
@@ -153,10 +161,11 @@ internal extension Networking {
         let (url, response) = try await self.urlSession.download(for: urlRequest, delegate: nil)
         return try self.handleFile(source: url, destination: destinationURL, response: response)
     }
+
 }
 
-private extension Networking {
-    
+internal extension Networking {
+
     func prepareUpload<T: Encodable>(item: T, in urlRequest: inout URLRequest) throws -> Data {
 
         let uncompressed = try JSONEncoder().encode(item)
