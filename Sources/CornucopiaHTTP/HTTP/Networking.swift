@@ -213,6 +213,9 @@ internal extension Networking {
             // Some servers return `application/x-dosexec` for `.bin` files, which we want as binary.
             case .applicationXDosexec where T.self == Data.self || T.self == Optional<Data>.self:
                 return data as! T
+            // Last, but not least, some return `application/binary`...
+            case .applicationBinary where T.self == Data.self || T.self == Optional<Data>.self:
+                return data as! T
 
             default:
                 throw Error.unexpectedMimeType(response.mimeType ?? "unknown/unknown")

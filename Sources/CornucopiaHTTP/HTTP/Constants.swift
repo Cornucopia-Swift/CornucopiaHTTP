@@ -59,6 +59,7 @@ extension HTTP {
 
     /// Well-known HTTP mime types
     @frozen public enum MimeType: String {
+        case applicationBinary = "application/binary"
         case applicationJSON = "application/json"
         case applicationOctetStream = "application/octet-stream"
         case applicationXDosexec = "application/x-dosexec"
