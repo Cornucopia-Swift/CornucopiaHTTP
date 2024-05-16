@@ -168,7 +168,7 @@ internal extension Networking {
 
     func prepareUpload<T: Encodable>(item: T, in urlRequest: inout URLRequest) throws -> Data {
 
-        let uncompressed = try JSONEncoder().encode(item)
+        let uncompressed = try Cornucopia.Core.JSONEncoder().encode(item)
         urlRequest.setValue(HTTP.MimeType.applicationJSON.rawValue, forHTTPHeaderField: HTTP.HeaderField.contentType.rawValue)
         guard Self.enableCompressedUploads else { return uncompressed }
         do {
