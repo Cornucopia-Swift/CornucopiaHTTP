@@ -11,7 +11,7 @@ import FoundationBandAid
 #endif
 import SWCompression
 
-public class Networking: NSObject {
+public final class Networking: NSObject {
 
     /// To opt-out of compressing
     public static var enableCompressedUploads: Bool = true

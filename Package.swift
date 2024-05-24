@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
     name: "CornucopiaHTTP",
     platforms: [
-        .macOS("12"),
-        .iOS("15"),
-        .tvOS("15"),
-        .watchOS("8"),
+        .iOS(.v15),
+        .macOS(.v12),
+        .tvOS(.v15),
+        .watchOS(.v8),
         //.linux
     ],
     products: [
@@ -19,7 +19,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Cornucopia-Swift/CornucopiaCore", branch: "master"),
-        .package(url: "https://github.com/tsolomko/SWCompression", from: "4.6.0"),
+        .package(url: "https://github.com/tsolomko/SWCompression", from: "4.8.6"),
         .package(url: "https://github.com/mickeyl/FoundationBandAid", branch: "master"),
     ],
     targets: [
