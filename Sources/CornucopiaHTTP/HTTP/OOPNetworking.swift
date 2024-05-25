@@ -54,7 +54,7 @@ public extension OOPNetworking {
     /// Issues a GET request, writing the output to a file.
     /// Returns the (original) URL for looking up the status in the `tasks` property.
     func GET(from urlRequest: URLRequest, to destinationURL: URL) -> URL {
-        guard let url = urlRequest.url else { precondition(false, "urlRequest has no URL") }
+        guard let url = urlRequest.url else { fatalError("urlRequest has no URL") }
         var urlRequest = urlRequest
         urlRequest.mainDocumentURL = destinationURL // save the destinationURL to spare another lookup
         let task = self.session.downloadTask(with: urlRequest)
