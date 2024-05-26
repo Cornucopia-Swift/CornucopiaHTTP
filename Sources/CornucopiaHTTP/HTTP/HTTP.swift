@@ -62,6 +62,7 @@ import FoundationNetworking
     }
 
     /// Issues a HTTP POST request with a binary resource and returns the status code ­– ignoring any further content received from the server.
+    @discardableResult
     public static func POST(data: Data, via urlRequest: URLRequest) async throws -> HTTP.Status {
         try await Networking().self.binaryUpload(data: data, urlRequest: urlRequest)
     }

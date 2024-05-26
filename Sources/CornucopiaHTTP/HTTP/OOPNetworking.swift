@@ -8,6 +8,7 @@ import SWCompression
 
 private var logger = Cornucopia.Core.Logger()
 
+/// Support for out-of-process networking on [Apple platforms](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background/).
 public final class OOPNetworking: NSObject {
 
     public var tasks: [URL: URLSessionTask] = [:]
@@ -23,13 +24,17 @@ public final class OOPNetworking: NSObject {
         session.getAllTasks { tasks in
 
             defer { semaphore.signal() }
-            self.tasks = [:]
+            var tasksByURL: [URL: URLSessionTask] = [:]
             for task in tasks {
                 guard let url = task.originalRequest?.url else {
                     logger.debug("Ignoring task without original request URL: \(task)")
                     continue
                 }
-                self.tasks[url] = task
+                tasksByURL[url] = task
+            }
+            if !tasks.isEmpty {
+                logger.info("There are \(tasks.count) ongoing tasks: \(tasks)")
+                self.tasks = tasksByURL
             }
         }
         semaphore.wait()
@@ -53,15 +58,32 @@ public extension OOPNetworking {
 
     /// Issues a GET request, writing the output to a file.
     /// Returns the (original) URL for looking up the status in the `tasks` property.
-    func GET(from urlRequest: URLRequest, to destinationURL: URL) -> URL {
-        guard let url = urlRequest.url else { fatalError("urlRequest has no URL") }
+    @discardableResult
+    func GET(from urlRequest: URLRequest, to destinationURL: URL) throws -> URLSessionDownloadTask {
+        guard let url = urlRequest.url else { throw Networking.Error.unsuitableRequest("Missing URL") }
+        guard !self.tasks.keys.contains(url) else { throw Networking.Error.unsuitableRequest("Already downloading from URL \(url)") }
         var urlRequest = urlRequest
         urlRequest.mainDocumentURL = destinationURL // save the destinationURL to spare another lookup
         let task = self.session.downloadTask(with: urlRequest)
         self.tasks[url] = task
         task.resume()
-        logger.debug("Launched OOP-GET for \(url) => \(destinationURL.absoluteString)")
-        return url
+        logger.debug("Launched GET for \(url) => \(destinationURL.absoluteString)")
+        return task
+    }
+
+    @discardableResult
+    func POST<UP: Encodable>(item: UP, via urlRequest: URLRequest) throws -> URLSessionUploadTask {
+        var urlRequest = urlRequest
+        urlRequest.httpMethod = "POST"
+        guard let url = urlRequest.url else { throw Networking.Error.unsuitableRequest("Missing URL") }
+        let data = try self.networking.prepareUpload(item: item, in: &urlRequest)
+        let fileUrl = FileManager.CC_urlInTempDirectory(suffix: "\(UUID())")
+        try data.write(to: fileUrl)
+        let task = self.session.uploadTask(with: urlRequest, fromFile: fileUrl)
+        self.tasks[url] = task
+        task.resume()
+        logger.debug("Launched POST of \(fileUrl) to \(url)")
+        return task
     }
 }
 
@@ -91,6 +113,8 @@ extension OOPNetworking: URLSessionDelegate, URLSessionDownloadDelegate {
         } else {
             logger.info("Task \(task) finished")
         }
+        guard let url = task.originalRequest?.url else { return }
+        self.tasks.removeValue(forKey: url)
     }
 }
 

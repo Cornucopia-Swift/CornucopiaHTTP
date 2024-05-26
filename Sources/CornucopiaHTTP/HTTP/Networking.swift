@@ -25,6 +25,7 @@ public final class Networking: NSObject {
     /// What can go wrong?
     @frozen public enum Error: Swift.Error {
 
+        case unsuitableRequest(String)
         case unexpectedResponse(String)
         case unexpectedMimeType(String)
         case unsuccessful(HTTP.Status)
