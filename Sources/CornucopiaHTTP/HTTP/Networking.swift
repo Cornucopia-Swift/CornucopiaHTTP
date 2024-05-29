@@ -96,11 +96,11 @@ internal extension Networking {
 
     func download<T: Decodable>(urlRequest: URLRequest) async throws -> T {
         
-        if let mock = Self.mock(for: urlRequest) { return try self.handleIncoming(data: mock.data, response: mock.response) }
+        if let mock = Self.mock(for: urlRequest) { return try Self.handleIncoming(data: mock.data, response: mock.response) }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (data, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
-        return try self.handleIncoming(data: data, response: response)
+        return try Self.handleIncoming(data: data, response: response)
     }
     
     func trigger(urlRequest: URLRequest, method: HTTP.Method) async throws -> HTTP.Status {
@@ -110,7 +110,7 @@ internal extension Networking {
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
-        return try self.handleResponse(response).status
+        return try Self.handleResponse(response).status
     }
 
     func headers(urlRequest: URLRequest) async throws -> HTTP.Headers {
@@ -120,18 +120,18 @@ internal extension Networking {
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
-        return try self.handleResponse(response).headers
+        return try Self.handleResponse(response).headers
     }
 
     func upload<T: Encodable>(item: T, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> HTTP.Status {
 
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
-        let uploadData = try self.prepareUpload(item: item, in: &urlRequest)
+        let uploadData = try Self.prepareUpload(item: item, in: &urlRequest)
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
-        return try self.handleResponse(response).status
+        return try Self.handleResponse(response).status
     }
 
     func binaryUpload(data: Data, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> HTTP.Status {
@@ -142,32 +142,32 @@ internal extension Networking {
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.upload(for: urlRequest, from: data, delegate: nil)
-        return try self.handleResponse(response).status
+        return try Self.handleResponse(response).status
     }
 
     func updownload<UP: Encodable, DOWN: Decodable>(item: UP, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> DOWN {
 
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
-        let uploadData = try self.prepareUpload(item: item, in: &urlRequest)
+        let uploadData = try Self.prepareUpload(item: item, in: &urlRequest)
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (data, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
-        return try self.handleIncoming(data: data, response: response)
+        return try Self.handleIncoming(data: data, response: response)
     }
 
     func load(urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (url, response) = try await self.urlSession.download(for: urlRequest, delegate: nil)
-        return try self.handleFile(source: url, destination: destinationURL, response: response)
+        return try Self.handleFile(source: url, destination: destinationURL, response: response)
     }
 
 }
 
 internal extension Networking {
 
-    func prepareUpload<T: Encodable>(item: T, in urlRequest: inout URLRequest) throws -> Data {
+    static func prepareUpload<T: Encodable>(item: T, in urlRequest: inout URLRequest) throws -> Data {
 
         let uncompressed = try Cornucopia.Core.JSONEncoder().encode(item)
         urlRequest.setValue(HTTP.MimeType.applicationJSON.rawValue, forHTTPHeaderField: HTTP.HeaderField.contentType.rawValue)
@@ -183,7 +183,7 @@ internal extension Networking {
         return uncompressed
     }
     
-    func handleIncoming<T: Decodable>(data: Data, response: URLResponse) throws -> T {
+    static func handleIncoming<T: Decodable>(data: Data, response: URLResponse) throws -> T {
 
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
         let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
@@ -223,8 +223,8 @@ internal extension Networking {
         }
     }
     
-    func handleResponse(_ response: URLResponse) throws -> HTTP.StatusAndHeaders {
-        
+    static func handleResponse(_ response: URLResponse) throws -> HTTP.StatusAndHeaders {
+
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
         let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
         guard status.responseType == .Success else { throw Error.unsuccessful(status) }
@@ -232,8 +232,8 @@ internal extension Networking {
         return (status, headers)
     }
     
-    func handleFile(source: URL, destination: URL, response: URLResponse) throws -> HTTP.Headers {
-        
+    static func handleFile(source: URL, destination: URL, response: URLResponse) throws -> HTTP.Headers {
+
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
         let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
         guard status.responseType == .Success else { throw Error.unsuccessful(status) }
