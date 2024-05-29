@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/tsolomko/BitByteData",
         "state": {
           "branch": null,
-          "revision": "b4b41619522aacd7aae7b02fa8360833e796a03d",
-          "version": "2.0.2"
+          "revision": "cdcdc5177ad536cfb11b95c620f926a81014b7fe",
+          "version": "2.0.4"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/Cornucopia-Swift/CornucopiaCore",
         "state": {
           "branch": "master",
-          "revision": "fbacd452e47d7a3c149583ebdac6368a38bd52da",
+          "revision": "2b41739fdb9f979957f88249a8ae693536654b96",
           "version": null
         }
       },
@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/mickeyl/FoundationBandAid",
         "state": {
           "branch": "master",
-          "revision": "6c617364582c50b944a8ba2b51ece4681ae724ce",
+          "revision": "53f5e669bc9828bf8c8ecdd8da0c20bcb603658d",
           "version": null
         }
       },
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-crypto",
         "state": {
           "branch": null,
-          "revision": "ddb07e896a2a8af79512543b1c7eb9797f8898a5",
-          "version": "1.1.7"
+          "revision": "60f13f60c4d093691934dc6cfdf5f508ada1f894",
+          "version": "2.6.0"
         }
       }
     ]
