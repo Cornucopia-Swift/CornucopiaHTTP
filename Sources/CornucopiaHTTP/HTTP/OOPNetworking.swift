@@ -41,12 +41,6 @@ public final class OOPNetworking: NSObject {
         return session
     }()
 
-    private lazy var networking: Networking = {
-
-        Networking.customURLSession = self.session
-        return Networking()
-    }()
-
     private override init() {
         super.init()
         _ = self.session
@@ -76,7 +70,7 @@ public extension OOPNetworking {
         var urlRequest = urlRequest
         urlRequest.httpMethod = "POST"
         guard let url = urlRequest.url else { throw Networking.Error.unsuitableRequest("Missing URL") }
-        let data = try self.networking.prepareUpload(item: item, in: &urlRequest)
+        let data = try Networking.prepareUpload(item: item, in: &urlRequest)
         let fileUrl = FileManager.CC_urlInTempDirectory(suffix: "\(UUID())")
         try data.write(to: fileUrl)
         let task = self.session.uploadTask(with: urlRequest, fromFile: fileUrl)
