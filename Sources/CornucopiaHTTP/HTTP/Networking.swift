@@ -13,9 +13,6 @@ import SWCompression
 
 public final class Networking: NSObject {
 
-    /// To opt-out of compressing
-    public static var enableCompressedUploads: Bool = true
-
     /// To use a custom URLSession
     public static var customURLSession: URLSession?
 
@@ -171,7 +168,7 @@ internal extension Networking {
 
         let uncompressed = try Cornucopia.Core.JSONEncoder().encode(item)
         urlRequest.setValue(HTTP.MimeType.applicationJSON.rawValue, forHTTPHeaderField: HTTP.HeaderField.contentType.rawValue)
-        guard Self.enableCompressedUploads else { return uncompressed }
+        guard Self.shouldCompressUpload(urlRequest: urlRequest) else { return uncompressed }
         do {
             let compressed = try GzipArchive.archive(data: uncompressed)
             guard compressed.count < uncompressed.count else { return uncompressed }

@@ -72,4 +72,9 @@ final class CornucopiaHTTPTests: XCTestCase {
         let url = URL(string: "http://www.foo.bar.baz/testing")!
         try await HTTP.POST(data: data, via: URLRequest(url: url))
     }
+    
+    func testCompressedUpload() async throws {
+        
+        // TBD
+    }
 }
