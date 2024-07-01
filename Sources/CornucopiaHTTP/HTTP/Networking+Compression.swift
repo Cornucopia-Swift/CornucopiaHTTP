@@ -7,8 +7,8 @@ import FoundationNetworking
 #endif
 
 extension Networking {
-    
-    private static var compressedUploadWhitelist: [String: Regex<AnyRegexOutput>] = [:]
+
+    private static var compressedUploadWhitelist: [String: Regex<Substring>] = [:]
 
     internal static func shouldCompressUpload(urlRequest: URLRequest) -> Bool {
         guard let stringUrl = urlRequest.url?.absoluteString else { return false }
@@ -18,7 +18,7 @@ extension Networking {
     }
 
     /// Register a whitelist entry
-    public static func enableCompressedUploads(for regex: Regex<AnyRegexOutput>, key: String) {
+    public static func enableCompressedUploads(for regex: Regex<Substring>, key: String) {
         Self.compressedUploadWhitelist[key] = regex
     }
     

@@ -5,7 +5,6 @@
 import CornucopiaCore
 import Foundation
 import SWCompression
-import UIKit
 
 private var logger = Cornucopia.Core.Logger()
 
