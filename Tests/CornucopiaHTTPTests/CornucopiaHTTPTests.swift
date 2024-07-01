@@ -8,7 +8,7 @@ import FoundationNetworking
 let serverPrefix = "http://localhost:3000"
 
 struct Subject: Codable {
-    let id: Int?
+    let id: String?
     var name: String?
 }
 
@@ -22,16 +22,24 @@ final class CornucopiaHTTPTests: XCTestCase {
         XCTAssertGreaterThan(subjects.count, 1)
     }
 
-    func testPOST() async throws {
-        
+    func testPOST_uncompressed() async throws {
+
         let subjectsUrl = URL(string: "\(serverPrefix)/subjects")!
         let newSubject = Subject(id: nil, name: "Hans Wurst")
         let returnedSubject = try await HTTP.POST(item: newSubject, to: URLRequest(url: subjectsUrl))
         XCTAssertEqual(newSubject.name, returnedSubject.name)
     }
 
+    func testPOST_compressed() async throws {
+
+        let subjectsUrl = URL(string: "\(serverPrefix)/subjects")!
+        let newSubject = Subject(id: nil, name: "Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst Hans Wurst ")
+        let returnedSubject = try await HTTP.POST(item: newSubject, to: URLRequest(url: subjectsUrl))
+        XCTAssertEqual(newSubject.name, returnedSubject.name)
+    }
+
     func testPUT() async throws {
-        
+
         let subjectUrl = URL(string: "\(serverPrefix)/subjects/1")!
         var subject: Subject = try await HTTP.GET(from: URLRequest(url: subjectUrl))
         subject.name = "name has changed"

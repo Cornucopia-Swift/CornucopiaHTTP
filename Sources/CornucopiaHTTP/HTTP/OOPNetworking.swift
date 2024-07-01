@@ -5,6 +5,7 @@
 import CornucopiaCore
 import Foundation
 import SWCompression
+import UIKit
 
 private var logger = Cornucopia.Core.Logger()
 
@@ -12,6 +13,7 @@ private var logger = Cornucopia.Core.Logger()
 public final class OOPNetworking: NSObject {
 
     public var tasks: [URL: URLSessionTask] = [:]
+    public var certificates: [String: Cornucopia.Core.PKCS12] = [:] // key is host, value is pkcs12
     public static let instance: OOPNetworking = .init()
 
     private static let identifier: String = "dev.cornucopia.http.BackgroundTransfers"
@@ -47,7 +49,14 @@ public final class OOPNetworking: NSObject {
     }
 }
 
-//MARK: Public API
+//MARK: Public API (Security)
+public extension OOPNetworking {
+    func addCertificate(from source: Cornucopia.Core.PKCS12, for host: String) {
+        self.certificates[host] = source
+    }
+}
+
+//MARK: Public API (HTTP)
 public extension OOPNetworking {
 
     /// Issues a GET request, writing the output to a file.
@@ -101,9 +110,30 @@ extension OOPNetworking: URLSessionDelegate, URLSessionDownloadDelegate {
         }
     }
 
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        let authenticationMethod = challenge.protectionSpace.authenticationMethod
+        logger.trace("Did receive URL authentication challenge w/ method '\(authenticationMethod). Host \(challenge.protectionSpace.host):\(challenge.protectionSpace.port)', Realm \(challenge.protectionSpace.realm ?? "N/A")")
+        guard authenticationMethod == NSURLAuthenticationMethodClientCertificate else {
+            logger.trace("Auth method is not NSURLAuthenticationMethodClientCertificate, using default handling")
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+        guard let certificateForHost = self.certificates[challenge.protectionSpace.host] else {
+            logger.trace("No certificate for host \(challenge.protectionSpace.host), using default handling")
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+        // Apple seems to recommend that we do not pass the certificate chain into
+        // the URLCredential used to respond to the challenge.
+        let credential = URLCredential(identity: certificateForHost.identity, certificates: nil, persistence: .none)
+        challenge.sender?.use(credential, for: challenge)
+        logger.trace("Supplying provided identity")
+        completionHandler(.useCredential, credential)
+    }
+
     public func urlSession(_: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let error = error {
-            logger.error("Task \(task) error: \(error)")
+            logger.error("Task \(task) failed w/ error: \(error)")
         } else {
             logger.info("Task \(task) finished")
         }

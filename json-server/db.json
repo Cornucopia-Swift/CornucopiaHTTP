@@ -2,35 +2,51 @@
   "subjects": [
     {
       "name": "name has changed",
-      "id": 1
+      "id": "1"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "reading"
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "english"
     },
     {
       "name": "Hans Wurst",
-      "id": 6
+      "id": "6"
     },
     {
       "name": "Hans Wurst",
-      "id": 7
+      "id": "7"
     },
     {
       "name": "Hans Wurst",
-      "id": 9
+      "id": "9"
     },
     {
       "name": "Hans Wurst",
-      "id": 10
+      "id": "10"
     },
     {
       "name": "Hans Wurst",
-      "id": 11
+      "id": "11"
+    },
+    {
+      "id": "ac9d",
+      "name": "Hans Wurst"
+    },
+    {
+      "id": "c00e",
+      "name": "Hans Wurst"
+    },
+    {
+      "id": "b2b2",
+      "name": "Hans Wurst"
+    },
+    {
+      "id": null,
+      "name": "Komprimierter Hans Wurst"
     }
   ]
 }

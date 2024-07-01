@@ -17,11 +17,14 @@ It's an SPM-compatible package.
 
 ## Usage
 
-TBD. For now, please take a look at the tests.
+TBD. For now, please take a look at the unit tests.
 
-## Tests
+## Unit Tests
 
-To run the end-to-end-tests, issue `json-server json-server/db.json` first.
+Before running the end-to-end-tests, please launch [json-server](https://github.com/typicode/json-server):
+```sh
+json-server json-server/db.json
+```
 
 ## Contribution
 
