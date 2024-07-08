@@ -89,6 +89,7 @@ public extension OOPNetworking {
     }
 }
 
+//MARK: - URLSessionDelegate, URLSessionDownloadDelegate
 extension OOPNetworking: URLSessionDelegate, URLSessionDownloadDelegate {
 
     public func urlSession(_: URLSession, downloadTask: URLSessionDownloadTask, didWriteData _: Int64, totalBytesWritten _: Int64, totalBytesExpectedToWrite _: Int64) {
@@ -135,6 +136,7 @@ extension OOPNetworking: URLSessionDelegate, URLSessionDownloadDelegate {
             logger.error("Task \(task) failed w/ error: \(error)")
         } else {
             logger.info("Task \(task) finished")
+            //FIXME: Delete the payload on disk?
         }
         guard let url = task.originalRequest?.url else { return }
         self.tasks.removeValue(forKey: url)
