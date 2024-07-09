@@ -11,7 +11,7 @@ private var logger = Cornucopia.Core.Logger()
 /// Support for out-of-process networking on [Apple platforms](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background/).
 public final class OOPNetworking: NSObject {
 
-    public var tasks: [URL: URLSessionTask] = [:]
+    public var tasks: Set<URLSessionTask> = []
     public var certificates: [String: Cornucopia.Core.PKCS12] = [:] // key is host, value is pkcs12
     public static let instance: OOPNetworking = .init()
 
@@ -23,20 +23,8 @@ public final class OOPNetworking: NSObject {
         //session.configuration.sessionSendsLaunchEvents = false
         let semaphore = DispatchSemaphore(value: 0)
         session.getAllTasks { tasks in
-
             defer { semaphore.signal() }
-            var tasksByURL: [URL: URLSessionTask] = [:]
-            for task in tasks {
-                guard let url = task.originalRequest?.url else {
-                    logger.debug("Ignoring task without original request URL: \(task)")
-                    continue
-                }
-                tasksByURL[url] = task
-            }
-            if !tasks.isEmpty {
-                logger.info("There are \(tasks.count) ongoing tasks: \(tasks)")
-                self.tasks = tasksByURL
-            }
+            self.tasks = Set(tasks)
         }
         semaphore.wait()
         return session
@@ -63,13 +51,13 @@ public extension OOPNetworking {
     @discardableResult
     func GET(from urlRequest: URLRequest, to destinationURL: URL) throws -> URLSessionDownloadTask {
         guard let url = urlRequest.url else { throw Networking.Error.unsuitableRequest("Missing URL") }
-        guard !self.tasks.keys.contains(url) else { throw Networking.Error.unsuitableRequest("Already downloading from URL \(url)") }
+        guard !self.tasks.contains(where: { $0.originalRequest?.url == url } ) else { throw Networking.Error.unsuitableRequest("Already downloading from URL \(url)") }
         var urlRequest = urlRequest
         urlRequest.mainDocumentURL = destinationURL // save the destinationURL to spare another lookup
         let task = self.session.downloadTask(with: urlRequest)
-        self.tasks[url] = task
+        self.tasks.insert(task)
         task.resume()
-        logger.debug("Launched GET for \(url) => \(destinationURL.absoluteString)")
+        logger.debug("Launched GET for \(url) => \(destinationURL.absoluteString). Outstanding tasks: \(self.tasks.count)")
         return task
     }
 
@@ -82,9 +70,12 @@ public extension OOPNetworking {
         let fileUrl = FileManager.CC_urlInTempDirectory(suffix: "\(UUID())")
         try data.write(to: fileUrl)
         let task = self.session.uploadTask(with: urlRequest, fromFile: fileUrl)
-        self.tasks[url] = task
+        self.tasks.insert(task)
         task.resume()
-        logger.debug("Launched POST of \(fileUrl) to \(url)")
+        // By the time, `resume()` returns, the file has been copied into the URLSession framework's private temporary store. We can now safely delete it.
+        // NOTE: This doesn't seem to be properly documented.
+        try? FileManager.default.removeItem(at: fileUrl)
+        logger.debug("Launched POST of a '\(type(of: item))' to \(url). Outstanding tasks: \(self.tasks.count)")
         return task
     }
 }
@@ -136,10 +127,8 @@ extension OOPNetworking: URLSessionDelegate, URLSessionDownloadDelegate {
             logger.error("Task \(task) failed w/ error: \(error)")
         } else {
             logger.info("Task \(task) finished")
-            //FIXME: Delete the payload on disk?
         }
-        guard let url = task.originalRequest?.url else { return }
-        self.tasks.removeValue(forKey: url)
+        self.tasks.remove(task)
     }
 }
 
