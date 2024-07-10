@@ -76,7 +76,7 @@ public extension OOPNetworking {
     @discardableResult
     func POST<UP: Encodable>(item: UP, via urlRequest: URLRequest) throws -> URLSessionUploadTask {
         var urlRequest = urlRequest
-        urlRequest.httpMethod = "POST"
+        urlRequest.httpMethod = HTTP.Method.POST.rawValue
         guard let url = urlRequest.url else { throw Networking.Error.unsuitableRequest("Missing URL") }
         let data = try Networking.prepareUpload(item: item, in: &urlRequest)
         let fileUrl = FileManager.CC_urlInTempDirectory(suffix: "\(UUID())")
