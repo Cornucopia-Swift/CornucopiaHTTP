@@ -11,16 +11,26 @@ private var logger = Cornucopia.Core.Logger()
 /// Support for out-of-process networking on [Apple platforms](https://developer.apple.com/documentation/foundation/url_loading_system/downloading_files_in_the_background/).
 public final class OOPNetworking: NSObject {
 
+    /// A blueprint for customizing the internal `URLSessionConfiguration`.
+    /// NOTE: This needs to be set before calling the `shared` method for the first time.
+    public static var customConfigurationBlueprint: URLSessionConfiguration? = nil
+    /// The shared instance.
+    public static let shared: OOPNetworking = .init()
+    /// Currently outstanding background tasks.
     public var tasks: Set<URLSessionTask> = []
+    /// Client certificates.
     public var certificates: [String: Cornucopia.Core.PKCS12] = [:] // key is host, value is pkcs12
-    public static let instance: OOPNetworking = .init()
 
-    private static let identifier: String = "dev.cornucopia.http.BackgroundTransfers"
     private lazy var session: URLSession = {
         let config = URLSessionConfiguration.background(withIdentifier: Self.identifier)
         config.isDiscretionary = false
+        //configuration.sessionSendsLaunchEvents = false
+        if let configurationBlueprint = Self.customConfigurationBlueprint {
+            config.multipathServiceType = configurationBlueprint.multipathServiceType
+            config.httpAdditionalHeaders = configurationBlueprint.httpAdditionalHeaders
+            //FIXME: Anything more here?
+        }
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
-        //session.configuration.sessionSendsLaunchEvents = false
         let semaphore = DispatchSemaphore(value: 0)
         session.getAllTasks { tasks in
             defer { semaphore.signal() }
@@ -34,6 +44,8 @@ public final class OOPNetworking: NSObject {
         super.init()
         _ = self.session
     }
+
+    private static let identifier: String = "dev.cornucopia.http.BackgroundTransfers"
 }
 
 //MARK: Public API (Security)
