@@ -24,20 +24,22 @@ extension HTTP {
 
         public var field: String {
             switch self {
-                case .acceptLanguage(_): return HeaderField.acceptLanguage.rawValue
-                case .authorization(_): return HeaderField.authorization.rawValue
-                case .contentDisposition(_): return HeaderField.contentDisposition.rawValue
-                case .contentEncoding(_): return HeaderField.contentEncoding.rawValue
-                case .contentLength(_): return HeaderField.contentLength.rawValue
-                case .contentType(_): return HeaderField.contentType.rawValue
-                case .rangeClosed(_), .rangePartialFrom(_), .rangePartialThrough(_): return HeaderField.range.rawValue
-                case .userAgent(_): return HeaderField.userAgent.rawValue
+                case .acceptLanguage(_):        HeaderField.acceptLanguage.rawValue
+                case .authorization(_):         HeaderField.authorization.rawValue
+                case .contentDisposition(_):    HeaderField.contentDisposition.rawValue
+                case .contentEncoding(_):       HeaderField.contentEncoding.rawValue
+                case .contentLength(_):         HeaderField.contentLength.rawValue
+                case .contentType(_):           HeaderField.contentType.rawValue
+                case .rangeClosed(_),
+                     .rangePartialFrom(_),
+                     .rangePartialThrough(_):   HeaderField.range.rawValue
+                case .userAgent(_):             HeaderField.userAgent.rawValue
             }
         }
 
         public var value: String {
             switch self {
-                case .userAgent(let value): return value
+                case .userAgent(let value): value
                 default: fatalError("not yet implemented")
             }
         }
