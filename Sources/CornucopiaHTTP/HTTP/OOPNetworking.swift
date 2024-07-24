@@ -26,7 +26,7 @@ public final class OOPNetworking: NSObject {
         config.isDiscretionary = false
         //configuration.sessionSendsLaunchEvents = false
         if let configurationBlueprint = Self.customConfigurationBlueprint {
-#if !os(macOS)
+#if os(iOS)
             config.multipathServiceType = configurationBlueprint.multipathServiceType
 #endif
             config.httpAdditionalHeaders = configurationBlueprint.httpAdditionalHeaders
