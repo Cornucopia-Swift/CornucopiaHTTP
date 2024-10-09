@@ -196,7 +196,7 @@ internal extension Networking {
         }
         switch mimeType {
             // This is the usual case. We try to decode into the requested type and return the resulting entity hierarchy.
-            case .applicationJSON:
+            case .applicationJSON, .textJavascript:
                 do {
                     let entity = try Cornucopia.Core.JSONDecoder().decode(T.self, from: data)
                     return entity

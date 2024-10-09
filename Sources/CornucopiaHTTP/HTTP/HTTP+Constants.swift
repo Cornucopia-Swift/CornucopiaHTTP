@@ -66,6 +66,7 @@ extension HTTP {
         case imageJPEG = "image/jpeg"
         case imageHEIC = "image/heic"
         case textPlain = "text/plain"
+        case textJavascript = "text/javascript"
         case unknown = "unknown/unknown"
     }
     
