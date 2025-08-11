@@ -92,6 +92,16 @@ extension Networking {
 
     /// Load a resource asynchronously, but offer a way to observe progress.
     public func load(urlRequest: URLRequest, to destinationURL: URL, progressObserver: @escaping ProgressObserver) async throws -> HTTP.Headers {
+        if let mock = Self.mock(for: urlRequest) {
+            // Simulate progress for mock data
+            let progress = Progress(totalUnitCount: Int64(mock.data.count))
+            progressObserver(progress)
+            progress.completedUnitCount = Int64(mock.data.count)
+            progressObserver(progress)
+            let result = try Self.handleResponse(mock.response)
+            try mock.data.write(to: destinationURL)
+            return result.headers
+        }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let headers = try await withCheckedThrowingContinuation { c in

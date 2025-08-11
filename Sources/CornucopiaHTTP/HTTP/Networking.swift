@@ -104,6 +104,7 @@ internal extension Networking {
         
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
+        if let mock = Self.mock(for: urlRequest) { return try Self.handleResponse(mock.response).status }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
@@ -114,6 +115,7 @@ internal extension Networking {
         
         var urlRequest = urlRequest
         urlRequest.httpMethod = HTTP.Method.HEAD.rawValue
+        if let mock = Self.mock(for: urlRequest) { return try Self.handleResponse(mock.response).headers }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
@@ -125,6 +127,7 @@ internal extension Networking {
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
         let uploadData = try Self.prepareUpload(item: item, in: &urlRequest)
+        if let mock = Self.mock(for: urlRequest) { return try Self.handleResponse(mock.response).status }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
@@ -136,6 +139,7 @@ internal extension Networking {
         var urlRequest = urlRequest
         urlRequest.setValue(HTTP.MimeType.applicationOctetStream.rawValue, forHTTPHeaderField: HTTP.HeaderField.contentType.rawValue)
         urlRequest.httpMethod = method.rawValue
+        if let mock = Self.mock(for: urlRequest) { return try Self.handleResponse(mock.response).status }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.upload(for: urlRequest, from: data, delegate: nil)
@@ -147,6 +151,7 @@ internal extension Networking {
         var urlRequest = urlRequest
         urlRequest.httpMethod = method.rawValue
         let uploadData = try Self.prepareUpload(item: item, in: &urlRequest)
+        if let mock = Self.mock(for: urlRequest) { return try Self.handleIncoming(data: mock.data, response: mock.response) }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (data, response) = try await self.urlSession.upload(for: urlRequest, from: uploadData, delegate: nil)
@@ -154,6 +159,11 @@ internal extension Networking {
     }
 
     func load(urlRequest: URLRequest, to destinationURL: URL) async throws -> HTTP.Headers {
+        if let mock = Self.mock(for: urlRequest) {
+            let result = try Self.handleResponse(mock.response)
+            try mock.data.write(to: destinationURL)
+            return result.headers
+        }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (url, response) = try await self.urlSession.download(for: urlRequest, delegate: nil)
