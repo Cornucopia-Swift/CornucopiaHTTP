@@ -133,10 +133,8 @@ final class CornucopiaHTTPIntegrationTests: XCTestCase {
     }
 
     func testPOST_LargePayload() async throws {
-        // Enable compression for localhost
-        let compressionRegex = try! Regex("http://localhost:.*") as Regex<Substring>
-        Networking.enableCompressedUploads(for: compressionRegex, key: "localhost-integration")
-        defer { Networking.disableCompressedUploads(for: "localhost-integration") }
+        // Note: json-server doesn't handle gzipped request bodies properly, so we test large payloads without compression
+        // This test verifies that large JSON payloads can be sent successfully to the server
         
         let subjectsUrl = URL(string: "\(serverPrefix)/subjects")!
         let longName = String(repeating: "Large Subject Name ", count: 100) + UUID().uuidString

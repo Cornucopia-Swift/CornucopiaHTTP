@@ -294,9 +294,3 @@ private struct TestUser: Codable {
     let email: String
 }
 
-// MARK: - Custom MIME Types for Testing
-
-private extension HTTP.MimeType {
-    static let textHtml = HTTP.MimeType(rawValue: "text/html") ?? HTTP.MimeType.unknown
-    static let textXml = HTTP.MimeType(rawValue: "text/xml") ?? HTTP.MimeType.unknown
-}
