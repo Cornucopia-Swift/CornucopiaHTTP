@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(swift test)",
+      "Bash(swift build:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Checking $file...\")",
+      "Bash(swift:*)",
+      "Bash(echo \"✓ $file syntax OK\")",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)"
+    ],
+    "deny": []
+  }
+}
