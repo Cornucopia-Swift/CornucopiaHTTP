@@ -39,8 +39,16 @@ extension HTTP {
 
         public var value: String {
             switch self {
-                case .userAgent(let value): value
-                default: fatalError("not yet implemented")
+                case .acceptLanguage(let value): return value
+                case .authorization(let token): return "Bearer \(token.base64)"
+                case .contentDisposition(let components): return components.joined(separator: "; ")
+                case .contentEncoding(let value): return value.rawValue
+                case .contentLength(let value): return "\(value)"
+                case .contentType(let value): return value.rawValue
+                case .rangeClosed(let range): return "bytes=\(range.lowerBound)-\(range.upperBound)"
+                case .rangePartialFrom(let range): return "bytes=\(range.lowerBound)-"
+                case .rangePartialThrough(let range): return "bytes=-\(range.upperBound)"
+                case .userAgent(let value): return value
             }
         }
 

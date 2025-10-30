@@ -1,25 +1,10 @@
 # CornucopiaHTTP – Modern Swift HTTP Networking
 
-🐚 The "horn of plenty" – a symbol of abundance.
+CornucopiaHTTP is a Swift Package Manager library that wraps `URLSession` in a modern async/await API, providing typed requests, automatic JSON handling, optional compression, progress callbacks, and background transfers.
 
-A Swift Package Manager library providing modern async/await HTTP networking abstractions for Swift 5.5+.
+## Installation
 
-## Features
-
-- **Modern async/await API** - Clean, readable asynchronous networking
-- **Dual API Design** - Static convenience methods (`HTTP.*`) and instance-based methods (`Networking().*`)
-- **Generic Type Safety** - Extensive use of `Encodable`/`Decodable` for type-safe JSON operations
-- **Automatic Compression** - Gzip compression applied automatically to uploads when beneficial
-- **File Downloads** - Support for file downloads with progress observation
-- **Background Downloads** - Out-of-process networking for downloads that survive app suspension (Apple platforms only)
-- **Built-in Mocking** - Comprehensive mocking system for testing
-- **Cross-Platform** - iOS, macOS, tvOS, watchOS, and Linux support
-
-## Quick Start
-
-### Installation
-
-Add CornucopiaHTTP to your Swift package dependencies:
+Add CornucopiaHTTP to your package manifest:
 
 ```swift
 dependencies: [
@@ -27,156 +12,166 @@ dependencies: [
 ]
 ```
 
-### Basic Usage
+Import the module in the targets that need networking:
 
-#### Static API (Simple and Direct)
+```swift
+.target(
+    name: "MyApp",
+    dependencies: [
+        .product(name: "CornucopiaHTTP", package: "CornucopiaHTTP")
+    ]
+)
+```
+
+## Quick Tour
+
+### Fetch typed data with the static API
 
 ```swift
 import CornucopiaHTTP
 
-// GET request with automatic JSON decoding
 struct User: Codable {
     let id: Int
     let name: String
 }
 
-let user: User = try await HTTP.GET(from: URLRequest(url: URL(string: "https://api.example.com/users/1")!))
+var request = URLRequest(url: URL(string: "https://api.example.com/users/1")!)
+request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-// POST request with JSON encoding/decoding
-let newUser = User(id: 0, name: "Alice")
-let createdUser: User = try await HTTP.POST(item: newUser, to: URLRequest(url: URL(string: "https://api.example.com/users")!))
-
-// Simple POST without expecting response body
-try await HTTP.POST(item: newUser, via: URLRequest(url: URL(string: "https://api.example.com/users")!))
-
-// File download
-try await HTTP.GET(from: URLRequest(url: URL(string: "https://example.com/file.zip")!), to: downloadURL)
-
-// Other HTTP methods
-try await HTTP.PUT(item: updatedUser, to: request)
-try await HTTP.PATCH(item: userUpdate, to: request)
-try await HTTP.DELETE(via: request)
-let headers = try await HTTP.HEAD(at: request)
+let user: User = try await HTTP.GET(from: request)
 ```
 
-#### Instance API (More Control)
+### Create resources with an instance
 
 ```swift
 let networking = Networking()
 
-// Same operations with instance methods
-let user: User = try await networking.GET(from: request)
-let createdUser: User = try await networking.POST(item: newUser, to: request)
+struct CreateUser: Encodable { var name: String }
+struct CreatedUser: Decodable { var id: Int; var name: String }
 
-// File download with progress observation
-try await networking.GET(from: request, to: downloadURL) { progress in
-    print("Download progress: \(progress.fractionCompleted)")
-}
+let url = URL(string: "https://api.example.com/users")!
+let create = CreateUser(name: "Ada")
+
+let created: CreatedUser = try await networking.POST(item: create, to: URLRequest(url: url))
+print("New user id", created.id)
 ```
 
-#### Background Downloads (Apple Platforms Only)
+### Download files and observe progress
 
 ```swift
-let backgroundNetworking = OOPNetworking()
-try await backgroundNetworking.GET(from: request, to: downloadURL)
+let downloadURL = FileManager.default.temporaryDirectory.appendingPathComponent("archive.zip")
+let request = URLRequest(url: URL(string: "https://downloads.example.com/archive.zip")!)
+
+let headers = try await networking.GET(from: request, to: downloadURL, progressObserver: { progress in
+    print("Progress", progress.fractionCompleted)
+})
+
+print("Saved to", downloadURL.path)
+print("Content-Length:", headers["Content-Length"] ?? "unknown")
 ```
 
-## Advanced Features
-
-### Compression Configuration
+### Background transfers on Apple platforms
 
 ```swift
-// Configure compression for specific URL patterns
-Networking.configureCompression(for: "https://api.example.com/.*", enabled: true)
+#if canImport(ObjectiveC)
+let backgroundNetworking = OOPNetworking.shared
+let task = try backgroundNetworking.GET(from: URLRequest(url: url), to: downloadURL)
+print("Task identifier:", task.taskIdentifier)
+#endif
 ```
 
-### Custom URLSession
+## Configuration Highlights
+
+- **Reuse an existing `URLSession`:** set `Networking.customURLSession` before creating instances.
+- **Observe UI state:** provide a `CornucopiaCore.BusynessObserver` via `Networking.busynessObserver` to toggle loading indicators.
+- **Enable upload compression:** allow gzip on selected endpoints.
 
 ```swift
-Networking.customURLSession = myCustomSession
+try Networking.enableCompressedUploads(
+    for: Regex("https://api.example.com/v1/.*"),
+    key: "api-v1"
+)
 ```
 
-### Progress Observation
+Disable it again with `Networking.disableCompressedUploads(for: "api-v1")`.
 
-```swift
-try await HTTP.GET(from: request, to: destinationURL) { progress in
-    DispatchQueue.main.async {
-        progressBar.progress = Float(progress.fractionCompleted)
-    }
-}
-```
+## Error Handling
 
-### Error Handling
+`Networking.Error` captures common failure cases:
+
+- `.unsuitableRequest` for malformed requests
+- `.unsuccessful(HTTP.Status)` for non-success status codes
+- `.unsuccessfulWithDetails` when the server returns a JSON error payload
+- `.decodingError` when decoding the response fails
+
+Use Swift’s `do/catch` to differentiate between them:
 
 ```swift
 do {
-    let user: User = try await HTTP.GET(from: request)
+    let profile: User = try await HTTP.GET(from: request)
 } catch Networking.Error.unsuccessful(let status) {
-    print("HTTP error: \(status)")
+    logger.error("Server returned \(status)")
 } catch Networking.Error.decodingError(let error) {
-    print("JSON decoding failed: \(error)")
+    logger.error("JSON decoding failed: \(error)")
 } catch {
-    print("Network error: \(error)")
+    logger.error("Unexpected networking error: \(error)")
 }
 ```
 
-### Mocking for Tests
+## Mocking and Local Testing
+
+`Networking.registerMockData(_:httpStatus:contentType:for:)` lets you stub responses without hitting the network.
 
 ```swift
-// Register mock data for testing
-Networking.registerMockData(for: "https://api.example.com/users/1") {
-    User(id: 1, name: "Test User")
-}
+let url = URL(string: "https://api.example.com/users/preview")!
+let payload = try JSONEncoder().encode(User(id: 42, name: "Preview"))
 
-// Your tests will now use the mock data instead of real network calls
-let user: User = try await HTTP.GET(from: request) // Returns mock data
+Networking.registerMockData(
+    payload,
+    httpStatus: .OK,
+    contentType: .applicationJSON,
+    for: url
+)
+
+let preview: User = try await HTTP.GET(from: URLRequest(url: url)) // served from the mock
 ```
 
-## Platform Requirements
+Mocks are stored in memory. Register the data you expect before invoking your API under test.
 
-- **iOS** 16.0+
-- **macOS** 13.0+
-- **tvOS** 16.0+
-- **watchOS** 9.0+
-- **Linux** (with Swift 5.10+)
+## Utilities
+
+- **FaviconFetcher** – locate a site’s favicon (or fall back to `/favicon.ico`) using the existing networking stack.
+- **Progress helpers** – `Networking.ProgressObserver` closures work for both real and mocked downloads.
+
+## Running the Test Suite
+
+Tests rely on a JSON server running at `http://localhost:3000`. Start it in a separate terminal:
+
+```bash
+json-server json-server/db.json
+```
+
+Then run the Swift tests:
+
+```bash
+swift test
+swift test --filter HTTPTests    # run a subset
+```
+
+## Platform Support
+
+- iOS 16.0+
+- macOS 13.0+
+- tvOS 16.0+
+- watchOS 9.0+
+- Linux with Swift 5.10+
 
 ## Dependencies
 
-- [CornucopiaCore](https://github.com/Cornucopia-Swift/CornucopiaCore) - JSON encoder/decoder and logging infrastructure
-- [SWCompression](https://github.com/tsolomko/SWCompression) - Gzip compression/decompression
-- [FoundationBandAid](https://github.com/mickeyl/FoundationBandAid) - Linux compatibility layer (Linux only)
+- [CornucopiaCore](https://github.com/Cornucopia-Swift/CornucopiaCore) – JSON codecs, logging, utility types
+- [SWCompression](https://github.com/tsolomko/SWCompression) – gzip compression
+- [FoundationBandAid](https://github.com/mickeyl/FoundationBandAid) – Linux compatibility layer
 
-## Testing
+## License
 
-The library includes comprehensive unit and integration tests. Tests automatically manage the required JSON server for integration testing:
-
-```bash
-# Run all tests
-swift test
-
-# Run specific test suites
-swift test --filter HTTPTests
-swift test --filter NetworkingTests
-```
-
-No manual setup required - the test suite automatically starts and stops the JSON server as needed.
-
-## Architecture
-
-### Core Components
-
-- **HTTP.swift** - Static convenience methods for all HTTP operations
-- **Networking.swift** - Instance-based HTTP client with full async/await support
-- **OOPNetworking.swift** - Background/out-of-process networking (Apple platforms only)
-
-### Key Design Patterns
-
-- **Dual APIs**: Both static convenience methods and instance methods for different use cases
-- **Generic Type Safety**: Extensive use of `Encodable`/`Decodable` constraints
-- **Automatic Compression**: Gzip compression applied when beneficial
-- **Progress Observation**: Closure-based progress callbacks for file operations
-- **Comprehensive Error Handling**: Detailed error types for different failure scenarios
-
-## Contributing
-
-This library is licensed under the terms of the MIT License. Contributions are always welcome!
+CornucopiaHTTP is released under the MIT license. Contributions and bug reports are welcome.

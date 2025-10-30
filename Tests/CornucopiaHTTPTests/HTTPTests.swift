@@ -3,6 +3,7 @@ import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
+import CornucopiaCore
 @testable import CornucopiaHTTP
 
 final class HTTPTests: XCTestCase {
@@ -15,6 +16,45 @@ final class HTTPTests: XCTestCase {
     override func tearDown() async throws {
         clearMocks()
         try await super.tearDown()
+    }
+
+    func testHeaderFormattingAppliesValues() throws {
+        var request = URLRequest(url: URL(string: "https://api.example.com/users")!)
+
+        request.CC_setHeader(.acceptLanguage("en-US"))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.acceptLanguage.rawValue), "en-US")
+
+        let tokenString = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJpc3N1ZXIiLCJhdWQiOiJhdWRpZW5jZSIsImlhdCI6MCwiZXhwIjoxLCJzdWIiOiIxMjMifQ.signature"
+        guard let token = Cornucopia.Core.JWT.Token<Cornucopia.Core.JWT.Payload>(from: tokenString) else {
+            XCTFail("Failed to create JWT token for test")
+            return
+        }
+        request.CC_setHeader(.authorization(token: token))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.authorization.rawValue), "Bearer \(token.base64)")
+
+        request.CC_setHeader(.contentType(.applicationJSON))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.contentType.rawValue), HTTP.MimeType.applicationJSON.rawValue)
+
+        request.CC_setHeader(.contentLength(42))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.contentLength.rawValue), "42")
+
+        request.CC_setHeader(.contentDisposition(["attachment", "filename=\"file.txt\""]))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.contentDisposition.rawValue), "attachment; filename=\"file.txt\"")
+
+        request.CC_setHeader(.rangeClosed(10...20))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.range.rawValue), "bytes=10-20")
+
+        request.CC_setHeader(.rangePartialFrom(30...))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.range.rawValue), "bytes=30-")
+
+        request.CC_setHeader(.rangePartialThrough(...40))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.range.rawValue), "bytes=-40")
+
+        request.CC_setHeader(.contentEncoding(.gzip))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.contentEncoding.rawValue), HTTP.ContentEncoding.gzip.rawValue)
+
+        request.CC_setHeader(.userAgent("CornucopiaHTTP/1.0"))
+        XCTAssertEqual(request.value(forHTTPHeaderField: HTTP.HeaderField.userAgent.rawValue), "CornucopiaHTTP/1.0")
     }
 
     // MARK: - GET Tests
@@ -71,6 +111,33 @@ final class HTTPTests: XCTestCase {
         let savedData = try Data(contentsOf: destination)
         XCTAssertEqual(savedData, mockData)
         
+        try? FileManager.default.removeItem(at: destination)
+    }
+
+    func testStaticGET_WithProgressObserver() async throws {
+        let url = URL(string: "https://api.example.com/download-with-progress")!
+        let mockData = Data(repeating: 0x01, count: 1024)
+        let destination = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
+
+        Networking.registerMockData(mockData, httpStatus: .OK, contentType: .applicationOctetStream, for: url)
+
+        let expectation = expectation(description: "progress observer invoked")
+        var observerCallCount = 0
+
+        let headers = try await HTTP.GET(from: URLRequest(url: url), to: destination, observeProgress: { progress in
+            observerCallCount += 1
+            XCTAssertGreaterThanOrEqual(progress.totalUnitCount, 0)
+            if observerCallCount == 1 {
+                expectation.fulfill()
+            }
+        })
+
+        await fulfillment(of: [expectation], timeout: 1.0)
+        XCTAssertGreaterThanOrEqual(observerCallCount, 1)
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
+        XCTAssertEqual(headers[HTTP.HeaderField.contentType.rawValue], HTTP.MimeType.applicationOctetStream.rawValue)
+
         try? FileManager.default.removeItem(at: destination)
     }
 
@@ -205,4 +272,3 @@ private struct TestUserPatch: Codable {
 private struct TestAction: Codable {
     let type: String
 }
-
