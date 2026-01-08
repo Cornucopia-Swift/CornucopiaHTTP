@@ -19,6 +19,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Cornucopia-Swift/CornucopiaCore", branch: "master"),
+        //.package(path: "../CornucopiaCore"),
         .package(url: "https://github.com/tsolomko/SWCompression", from: "4.8.6"),
         .package(url: "https://github.com/mickeyl/FoundationBandAid", branch: "master"),
     ],
