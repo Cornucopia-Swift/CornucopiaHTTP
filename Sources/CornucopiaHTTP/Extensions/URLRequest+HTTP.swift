@@ -63,6 +63,38 @@ extension URLRequest {
         try await Networking().self.binaryUpload(data: data, urlRequest: self)
     }
 
+    /// Issues a HTTP POST request with multipart data and returns the status code.
+    @discardableResult
+    public func POST(multipart parts: [Networking.MultipartPart]) async throws -> HTTP.Status {
+        try await Networking().self.POST(multipart: parts, via: self)
+    }
+
+    /// Issues a HTTP POST request with multipart data and returns a `Decodable` response.
+    public func POST<DOWN: Decodable>(multipart parts: [Networking.MultipartPart]) async throws -> DOWN {
+        try await Networking().self.POST(multipart: parts, to: self)
+    }
+
+    /// Issues a HTTP POST request with a JSON payload and a binary attachment.
+    @discardableResult
+    public func POST<UP: Encodable>(
+        json: UP,
+        binary: Data,
+        jsonFieldName: String = "json",
+        binaryFieldName: String = "file",
+        binaryFilename: String = "file.bin",
+        binaryMimeType: HTTP.MimeType = .applicationOctetStream
+    ) async throws -> HTTP.Status {
+        try await Networking().self.POST(
+            json: json,
+            binary: binary,
+            via: self,
+            jsonFieldName: jsonFieldName,
+            binaryFieldName: binaryFieldName,
+            binaryFilename: binaryFilename,
+            binaryMimeType: binaryMimeType
+        )
+    }
+
     /// Issues a HTTP PUT request with an `Codable` resource and returns the created resource (of the same type).
     public func PUT<UPDOWN: Codable>(item: UPDOWN) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: self, method: .PUT)

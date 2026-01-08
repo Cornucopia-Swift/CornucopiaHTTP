@@ -12,7 +12,7 @@ swift test --filter testGET    # Run specific test
 ```
 
 ### Running Tests with Mock Server
-Tests require a JSON server running on localhost:3000. Start it before running tests:
+Integration tests auto-start a JSON server on localhost:3000 when `json-server` is available at `/opt/homebrew/bin/json-server`. If it's not installed or you want to run it yourself, start it manually:
 ```bash
 json-server json-server/db.json
 ```

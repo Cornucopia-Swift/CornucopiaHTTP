@@ -67,6 +67,39 @@ import FoundationNetworking
         try await Networking().self.binaryUpload(data: data, urlRequest: urlRequest)
     }
 
+    /// Issues a HTTP POST request with multipart data and returns the status code.
+    @discardableResult
+    public static func POST(multipart parts: [Networking.MultipartPart], via urlRequest: URLRequest) async throws -> HTTP.Status {
+        try await Networking().self.POST(multipart: parts, via: urlRequest)
+    }
+
+    /// Issues a HTTP POST request with multipart data and returns a `Decodable` response.
+    public static func POST<DOWN: Decodable>(multipart parts: [Networking.MultipartPart], to urlRequest: URLRequest) async throws -> DOWN {
+        try await Networking().self.POST(multipart: parts, to: urlRequest)
+    }
+
+    /// Issues a HTTP POST request with a JSON payload and a binary attachment.
+    @discardableResult
+    public static func POST<UP: Encodable>(
+        json: UP,
+        binary: Data,
+        via urlRequest: URLRequest,
+        jsonFieldName: String = "json",
+        binaryFieldName: String = "file",
+        binaryFilename: String = "file.bin",
+        binaryMimeType: HTTP.MimeType = .applicationOctetStream
+    ) async throws -> HTTP.Status {
+        try await Networking().self.POST(
+            json: json,
+            binary: binary,
+            via: urlRequest,
+            jsonFieldName: jsonFieldName,
+            binaryFieldName: binaryFieldName,
+            binaryFilename: binaryFilename,
+            binaryMimeType: binaryMimeType
+        )
+    }
+
     /// Issues a HTTP PUT request with a `Codable` resource and returns the created resource (of the same type).
     public static func PUT<UPDOWN: Codable>(item: UPDOWN, to urlRequest: URLRequest) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: urlRequest, method: .PUT)

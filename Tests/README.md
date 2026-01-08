@@ -33,7 +33,7 @@ swift test --filter ProgressObservationTests
 ```
 
 ### Integration Tests
-Integration tests require a JSON server running on localhost:3000:
+Integration tests auto-start a JSON server on localhost:3000 when `json-server` is available at `/opt/homebrew/bin/json-server`. If it's not installed or you prefer to run it yourself:
 
 ```bash
 # Start the JSON server (in project root)
@@ -45,7 +45,7 @@ swift test --filter CornucopiaHTTPIntegrationTests
 
 ### All Tests
 ```bash
-# Run all tests (requires JSON server)
+# Run all tests (auto-starts JSON server if available)
 swift test
 ```
 

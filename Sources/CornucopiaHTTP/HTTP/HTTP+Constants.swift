@@ -65,6 +65,7 @@ extension HTTP {
         case applicationXDosexec = "application/x-dosexec"
         case imageJPEG = "image/jpeg"
         case imageHEIC = "image/heic"
+        case multipartFormData = "multipart/form-data"
         case textPlain = "text/plain"
         case textJavascript = "text/javascript"
         case textHtml = "text/html"

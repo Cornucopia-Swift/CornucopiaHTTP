@@ -145,7 +145,7 @@ Mocks are stored in memory. Register the data you expect before invoking your AP
 
 ## Running the Test Suite
 
-Tests rely on a JSON server running at `http://localhost:3000`. Start it in a separate terminal:
+Integration tests can auto-start a JSON server at `http://localhost:3000` when `json-server` is installed at `/opt/homebrew/bin/json-server`. If it's not installed or you prefer to run it yourself, start it in a separate terminal:
 
 ```bash
 json-server json-server/db.json
