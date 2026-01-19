@@ -20,3 +20,4 @@ xcshareddata
 DerivedData
 # SPM
 .swiftpm
+Package.resolved
