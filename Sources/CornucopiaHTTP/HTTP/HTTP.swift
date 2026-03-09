@@ -104,4 +104,15 @@ import FoundationNetworking
     public static func PUT<UPDOWN: Codable>(item: UPDOWN, to urlRequest: URLRequest) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: urlRequest, method: .PUT)
     }
+
+    /// Issues a HTTP PUT request with an `Encodable` resource and returns a `Decodable` resource of (possibly) another type.
+    public static func PUT<UP: Encodable, DOWN: Decodable>(item: UP, to urlRequest: URLRequest) async throws -> DOWN {
+        try await Networking().self.updownload(item: item, urlRequest: urlRequest, method: .PUT)
+    }
+
+    /// Issues a HTTP PUT request with an `Encodable` resource and returns the status code – ignoring any further content received from the server.
+    @discardableResult
+    public static func PUT<UP: Encodable>(item: UP, via urlRequest: URLRequest) async throws -> HTTP.Status {
+        try await Networking().self.upload(item: item, urlRequest: urlRequest, method: .PUT)
+    }
 }

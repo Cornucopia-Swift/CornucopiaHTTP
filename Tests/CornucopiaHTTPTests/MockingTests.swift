@@ -160,12 +160,34 @@ final class MockingTests: XCTestCase {
         let responseData = """
         {"id": 1, "name": "Updated User", "email": "updated@example.com"}
         """.data(using: .utf8)!
-        
+
         Networking.registerMockData(responseData, httpStatus: .OK, contentType: .applicationJSON, for: url)
-        
+
         let result: MockUser = try await HTTP.PUT(item: updatedUser, to: URLRequest(url: url))
         XCTAssertEqual(result.id, 1)
         XCTAssertEqual(result.name, "Updated User")
+    }
+
+    func testMockPUT_DifferentTypes() async throws {
+        let url = URL(string: "https://api.example.com/users/1")!
+        let responseData = """
+        {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
+        """.data(using: .utf8)!
+
+        Networking.registerMockData(responseData, httpStatus: .OK, contentType: .applicationJSON, for: url)
+
+        let result: MockUser = try await HTTP.PUT(item: MockUpdateRequest(name: "Updated Name"), to: URLRequest(url: url))
+        XCTAssertEqual(result.id, 1)
+        XCTAssertEqual(result.name, "Updated Name")
+    }
+
+    func testMockPUT_StatusOnly() async throws {
+        let url = URL(string: "https://api.example.com/users/1/status")!
+
+        Networking.registerMockData(Data(), httpStatus: .NoContent, contentType: .applicationJSON, for: url)
+
+        let status = try await HTTP.PUT(item: MockUpdateRequest(name: "activate"), via: URLRequest(url: url))
+        XCTAssertEqual(status, .NoContent)
     }
 
     func testMockDELETE() async throws {
@@ -309,6 +331,10 @@ private struct MockUser: Codable {
     let id: Int?
     let name: String
     let email: String
+}
+
+private struct MockUpdateRequest: Encodable {
+    let name: String
 }
 
 // MARK: - Custom MIME Types

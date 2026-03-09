@@ -99,4 +99,15 @@ extension URLRequest {
     public func PUT<UPDOWN: Codable>(item: UPDOWN) async throws -> UPDOWN {
         try await Networking().self.updownload(item: item, urlRequest: self, method: .PUT)
     }
+
+    /// Issues a HTTP PUT request with an `Encodable` resource and returns a `Decodable` resource of (possibly) another type.
+    public func PUT<UP: Encodable, DOWN: Decodable>(item: UP) async throws -> DOWN {
+        try await Networking().self.updownload(item: item, urlRequest: self, method: .PUT)
+    }
+
+    /// Issues a HTTP PUT request with an `Encodable` resource and returns the status code – ignoring any further content received from the server.
+    @discardableResult
+    public func PUT<UP: Encodable>(item: UP) async throws -> HTTP.Status {
+        try await Networking().self.upload(item: item, urlRequest: self, method: .PUT)
+    }
 }

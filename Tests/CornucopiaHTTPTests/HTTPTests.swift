@@ -185,12 +185,36 @@ final class HTTPTests: XCTestCase {
         let responseData = """
         {"id": 1, "name": "Updated User"}
         """.data(using: .utf8)!
-        
+
         Networking.registerMockData(responseData, httpStatus: .OK, contentType: .applicationJSON, for: url)
-        
+
         let result: TestUser = try await HTTP.PUT(item: user, to: URLRequest(url: url))
         XCTAssertEqual(result.id, 1)
         XCTAssertEqual(result.name, "Updated User")
+    }
+
+    func testStaticPUT_DifferentTypes() async throws {
+        let url = URL(string: "https://api.example.com/users/1")!
+        let patch = TestUserPatch(name: "Updated via PUT")
+        let responseData = """
+        {"id": 1, "name": "Updated via PUT"}
+        """.data(using: .utf8)!
+
+        Networking.registerMockData(responseData, httpStatus: .OK, contentType: .applicationJSON, for: url)
+
+        let result: TestUser = try await HTTP.PUT(item: patch, to: URLRequest(url: url))
+        XCTAssertEqual(result.id, 1)
+        XCTAssertEqual(result.name, "Updated via PUT")
+    }
+
+    func testStaticPUT_StatusOnly() async throws {
+        let url = URL(string: "https://api.example.com/users/1/activate")!
+        let action = TestAction(type: "activate")
+
+        Networking.registerMockData(Data(), httpStatus: .NoContent, contentType: .applicationJSON, for: url)
+
+        let status = try await HTTP.PUT(item: action, via: URLRequest(url: url))
+        XCTAssertEqual(status, .NoContent)
     }
 
     // MARK: - PATCH Tests
