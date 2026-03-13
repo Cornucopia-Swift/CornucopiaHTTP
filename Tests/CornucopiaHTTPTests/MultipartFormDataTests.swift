@@ -12,7 +12,10 @@ final class MultipartFormDataTests: XCTestCase {
         let boundary = "Boundary-Test"
         var request = URLRequest(url: URL(string: "https://api.example.com/upload")!)
         let payload = TestHelpers.TestUser(id: 1, name: "Alice", email: "alice@example.com")
-        let jsonPart = try Networking.MultipartPart.json(payload, name: "payload")
+        let encoder = Cornucopia.Core.JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        let jsonData = try encoder.encode(payload)
+        let jsonPart = Networking.MultipartPart(name: "payload", data: jsonData, mimeType: .applicationJSON)
         let binaryPart = Networking.MultipartPart(
             name: "file",
             data: Data("abc".utf8),
@@ -27,7 +30,7 @@ final class MultipartFormDataTests: XCTestCase {
             "\(HTTP.MimeType.multipartFormData.rawValue); boundary=\(boundary)"
         )
 
-        let jsonString = String(data: try Cornucopia.Core.JSONEncoder().encode(payload), encoding: .utf8)!
+        let jsonString = String(data: jsonData, encoding: .utf8)!
         let lineBreak = "\r\n"
         let expectedBody = [
             "--\(boundary)",
