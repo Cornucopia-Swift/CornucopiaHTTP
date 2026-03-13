@@ -14,11 +14,12 @@ extension Networking {
     private static var mocks: [URL: Mock] = [:]
 
     /// Register a networking mock.
-    public static func registerMockData(_ data: Data, httpStatus: HTTP.Status, contentType: HTTP.MimeType, for url: URL) {
-        let headers: [String: String] = [
+    public static func registerMockData(_ data: Data, httpStatus: HTTP.Status, contentType: HTTP.MimeType, for url: URL, additionalHeaders: [String: String] = [:]) {
+        var headers: [String: String] = [
             HTTP.HeaderField.contentType.rawValue: contentType.rawValue,
             HTTP.HeaderField.contentLength.rawValue: "\(data.count)",
         ]
+        headers.merge(additionalHeaders) { _, new in new }
         guard let response = HTTPURLResponse(url: url, statusCode: httpStatus.rawValue, httpVersion: "HTTP/1.1", headerFields: headers) else { return }
         self.mocks[url] = (data, response)
     }

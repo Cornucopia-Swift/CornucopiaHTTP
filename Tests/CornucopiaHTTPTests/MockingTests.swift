@@ -208,6 +208,30 @@ final class MockingTests: XCTestCase {
         XCTAssertEqual(headers[HTTP.HeaderField.contentType.rawValue], HTTP.MimeType.applicationJSON.rawValue)
     }
 
+    func testMockHEAD_ReturnsHeadersRegardlessOfStatus() async throws {
+        let url = URL(string: "https://api.example.com/version-check")!
+
+        Networking.registerMockData(
+            Data(),
+            httpStatus: .Unauthorized,
+            contentType: .applicationJSON,
+            for: url,
+            additionalHeaders: ["X-Current-App-Version": "3.1.0"]
+        )
+
+        let headers = try await HTTP.HEAD(at: URLRequest(url: url))
+        XCTAssertEqual(headers["X-Current-App-Version"], "3.1.0")
+    }
+
+    func testMockHEAD_SuccessStillWorks() async throws {
+        let url = URL(string: "https://api.example.com/healthy")!
+
+        Networking.registerMockData(Data(), httpStatus: .OK, contentType: .applicationJSON, for: url)
+
+        let headers = try await HTTP.HEAD(at: URLRequest(url: url))
+        XCTAssertEqual(headers[HTTP.HeaderField.contentType.rawValue], HTTP.MimeType.applicationJSON.rawValue)
+    }
+
     // MARK: - Multiple Mocks
 
     func testMultipleMocks() {

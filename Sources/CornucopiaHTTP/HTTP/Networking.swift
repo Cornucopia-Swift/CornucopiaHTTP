@@ -112,14 +112,14 @@ internal extension Networking {
     }
 
     func headers(urlRequest: URLRequest) async throws -> HTTP.Headers {
-        
+
         var urlRequest = urlRequest
         urlRequest.httpMethod = HTTP.Method.HEAD.rawValue
-        if let mock = Self.mock(for: urlRequest) { return try Self.handleResponse(mock.response).headers }
+        if let mock = Self.mock(for: urlRequest) { return try Self.headersFromResponse(mock.response) }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
-        return try Self.handleResponse(response).headers
+        return try Self.headersFromResponse(response)
     }
 
     func upload<T: Encodable>(item: T, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> HTTP.Status {
@@ -230,6 +230,11 @@ internal extension Networking {
         }
     }
     
+    static func headersFromResponse(_ response: URLResponse) throws -> HTTP.Headers {
+        guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
+        return httpResponse.allHeaderFields as? [String: String] ?? [:]
+    }
+
     static func handleResponse(_ response: URLResponse) throws -> HTTP.StatusAndHeaders {
 
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }

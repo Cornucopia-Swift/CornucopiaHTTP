@@ -150,6 +150,52 @@ final class NetworkingTests: XCTestCase {
         try? FileManager.default.removeItem(at: destination)
     }
 
+    func testInstanceHEAD_ReturnsHeadersOnUnauthorized() async throws {
+        let url = URL(string: "https://api.example.com/protected")!
+
+        Networking.registerMockData(
+            Data(),
+            httpStatus: .Unauthorized,
+            contentType: .applicationJSON,
+            for: url,
+            additionalHeaders: ["X-Current-App-Version": "2.0.0"]
+        )
+
+        let headers = try await networking.HEAD(at: URLRequest(url: url))
+        XCTAssertEqual(headers["X-Current-App-Version"], "2.0.0")
+    }
+
+    func testInstanceHEAD_ReturnsHeadersOnForbidden() async throws {
+        let url = URL(string: "https://api.example.com/forbidden")!
+
+        Networking.registerMockData(
+            Data(),
+            httpStatus: .Forbidden,
+            contentType: .applicationJSON,
+            for: url,
+            additionalHeaders: ["X-Custom-Header": "custom-value"]
+        )
+
+        let headers = try await networking.HEAD(at: URLRequest(url: url))
+        XCTAssertEqual(headers["X-Custom-Header"], "custom-value")
+    }
+
+    func testInstanceHEAD_ReturnsHeadersOnServerError() async throws {
+        let url = URL(string: "https://api.example.com/server-error-head")!
+
+        Networking.registerMockData(
+            Data(),
+            httpStatus: .InternalServerError,
+            contentType: .applicationJSON,
+            for: url,
+            additionalHeaders: ["X-Request-Id": "abc-123"]
+        )
+
+        let headers = try await networking.HEAD(at: URLRequest(url: url))
+        XCTAssertEqual(headers["X-Request-Id"], "abc-123")
+        XCTAssertEqual(headers[HTTP.HeaderField.contentType.rawValue], HTTP.MimeType.applicationJSON.rawValue)
+    }
+
     // MARK: - Custom URLSession Tests
 
     func testCustomURLSession() {
