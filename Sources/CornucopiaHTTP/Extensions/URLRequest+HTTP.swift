@@ -27,8 +27,12 @@ extension URLRequest {
     }
     
     /// Issues a HTTP HEAD request, returning a set of headers.
-    public func HEAD() async throws -> HTTP.Headers {
-        try await Networking().self.headers(urlRequest: self)
+    ///
+    /// By default, the headers are returned regardless of the HTTP status, so that server-provided metadata
+    /// from unauthenticated or otherwise non-success endpoints remains accessible. Pass `throwIfUnsuccessful: true`
+    /// to instead throw `Error.unsuccessful(status)` on a non-success status.
+    public func HEAD(throwIfUnsuccessful: Bool = false) async throws -> HTTP.Headers {
+        try await Networking().self.headers(urlRequest: self, throwIfUnsuccessful: throwIfUnsuccessful)
     }
     
     /// Issues a HTTP PATCH request with an `Codable` resource and returns the created resource (of the same type).

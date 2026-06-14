@@ -31,8 +31,12 @@ import FoundationNetworking
     }
 
     /// Issues a HTTP HEAD request, returning a set of headers.
-    public static func HEAD(at urlRequest: URLRequest) async throws -> HTTP.Headers {
-        try await Networking().self.headers(urlRequest: urlRequest)
+    ///
+    /// By default, the headers are returned regardless of the HTTP status, so that server-provided metadata
+    /// from unauthenticated or otherwise non-success endpoints remains accessible. Pass `throwIfUnsuccessful: true`
+    /// to instead throw `Error.unsuccessful(status)` on a non-success status.
+    public static func HEAD(at urlRequest: URLRequest, throwIfUnsuccessful: Bool = false) async throws -> HTTP.Headers {
+        try await Networking().self.headers(urlRequest: urlRequest, throwIfUnsuccessful: throwIfUnsuccessful)
     }
 
     /// Issues a HTTP PATCH request with an `Codable` resource and returns the created resource (of the same type).

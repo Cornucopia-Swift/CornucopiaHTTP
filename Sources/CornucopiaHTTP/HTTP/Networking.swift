@@ -62,8 +62,8 @@ public final class Networking: NSObject {
     }
 
     /// Issues a HEAD request, returning a set of headers.
-    public func HEAD(at urlRequest: URLRequest) async throws -> HTTP.Headers {
-        try await self.headers(urlRequest: urlRequest)
+    public func HEAD(at urlRequest: URLRequest, throwIfUnsuccessful: Bool = false) async throws -> HTTP.Headers {
+        try await self.headers(urlRequest: urlRequest, throwIfUnsuccessful: throwIfUnsuccessful)
     }
 
     /// Issues a POST request with an `Encodable` resource and returns the created resource (of the same type).
@@ -111,15 +111,15 @@ internal extension Networking {
         return try Self.handleResponse(response).status
     }
 
-    func headers(urlRequest: URLRequest) async throws -> HTTP.Headers {
+    func headers(urlRequest: URLRequest, throwIfUnsuccessful: Bool = false) async throws -> HTTP.Headers {
 
         var urlRequest = urlRequest
         urlRequest.httpMethod = HTTP.Method.HEAD.rawValue
-        if let mock = Self.mock(for: urlRequest) { return try Self.headersFromResponse(mock.response) }
+        if let mock = Self.mock(for: urlRequest) { return try Self.headersFromResponse(mock.response, throwIfUnsuccessful: throwIfUnsuccessful) }
         if let busynessObserver = Self.busynessObserver { busynessObserver.enterBusy() }
         defer { if let busynessObserver = Self.busynessObserver { busynessObserver.leaveBusy() } }
         let (_, response) = try await self.urlSession.data(for: urlRequest, delegate: nil)
-        return try Self.headersFromResponse(response)
+        return try Self.headersFromResponse(response, throwIfUnsuccessful: throwIfUnsuccessful)
     }
 
     func upload<T: Encodable>(item: T, urlRequest: URLRequest, method: HTTP.Method = .POST) async throws -> HTTP.Status {
@@ -230,8 +230,12 @@ internal extension Networking {
         }
     }
     
-    static func headersFromResponse(_ response: URLResponse) throws -> HTTP.Headers {
+    static func headersFromResponse(_ response: URLResponse, throwIfUnsuccessful: Bool = false) throws -> HTTP.Headers {
         guard let httpResponse = response as? HTTPURLResponse else { throw Error.unexpectedResponse("\(type(of: response)) != HTTPURLResponse") }
+        if throwIfUnsuccessful {
+            let status = HTTP.Status(rawValue: httpResponse.statusCode) ?? .Unknown
+            guard status.responseType == .Success else { throw Error.unsuccessful(status) }
+        }
         return httpResponse.allHeaderFields as? [String: String] ?? [:]
     }
 
