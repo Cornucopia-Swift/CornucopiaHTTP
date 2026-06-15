@@ -7,9 +7,9 @@ let package = Package(
     name: "CornucopiaHTTP",
     platforms: [
         .iOS(.v18),
-        .macOS(.v13),
-        .tvOS(.v17),
-        .watchOS(.v10),
+        .macOS(.v14),
+        .tvOS(.v18),
+        .watchOS(.v11),
         //.linux
     ],
     products: [
